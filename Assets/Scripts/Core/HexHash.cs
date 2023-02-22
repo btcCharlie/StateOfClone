@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace StateOfClone.GameMap
+namespace StateOfClone.Core
 {
     /// <summary>
     /// Five-component hash value.
