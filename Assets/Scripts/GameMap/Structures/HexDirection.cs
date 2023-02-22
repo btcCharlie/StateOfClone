@@ -1,4 +1,4 @@
-namespace btcharlie.GameMap
+namespace StateOfClone.GameMap
 {
     /// <summary>
     /// Hexagonal direction, pointy side up, which is north.

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.IO;
 
-namespace btcharlie.GameMap
+namespace StateOfClone.GameMap
 {
     /// <summary>
     /// Immutable three-component hexagonal coordinates.

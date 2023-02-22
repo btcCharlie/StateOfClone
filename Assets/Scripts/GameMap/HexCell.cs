@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace btcharlie.GameMap
+namespace StateOfClone.GameMap
 {
     public class HexCell : MonoBehaviour
     {

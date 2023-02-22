@@ -1,4 +1,4 @@
-namespace btcharlie.GameMap
+namespace StateOfClone.GameMap
 {
     /// <summary>
     /// Hexagon edge type, determined by absolute elevation difference of adjacent cells.

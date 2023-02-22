@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace btcharlie.GameMap
+namespace StateOfClone.GameMap
 {
     /// <summary>
     /// Constant metrics and utility methods for the hex map.

@@ -1,9 +1,7 @@
 {
-    "name": "GameMap",
-    "rootNamespace": "StateOfClone.GameMap",
-    "references": [
-        "GUID:9273c36cbff67ef4bb16d6eba10e674f"
-    ],
+    "name": "Core",
+    "rootNamespace": "StateOfClone.Core",
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
