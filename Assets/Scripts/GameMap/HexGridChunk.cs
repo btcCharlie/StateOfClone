@@ -15,9 +15,9 @@ namespace StateOfClone.GameMap
 
         private Canvas gridCanvas;
 
-        private static Color weights1 = new Color(1f, 0f, 0f);
-        private static Color weights2 = new Color(0f, 1f, 0f);
-        private static Color weights3 = new Color(0f, 0f, 1f);
+        private static Color weights1 = new(1f, 0f, 0f);
+        private static Color weights2 = new(0f, 1f, 0f);
+        private static Color weights3 = new(0f, 0f, 1f);
 
         private void Awake()
         {
