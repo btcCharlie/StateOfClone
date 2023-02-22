@@ -5,6 +5,7 @@ using StateOfClone.Core;
 
 namespace StateOfClone.GameMap
 {
+
     /// <summary>
     /// Class containing all data used to generate a mesh while triangulating a hex map.
     /// </summary>
