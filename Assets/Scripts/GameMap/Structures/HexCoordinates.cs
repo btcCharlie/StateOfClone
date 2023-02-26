@@ -38,13 +38,9 @@ namespace StateOfClone.GameMap
             {
                 int oX = x + z / 2;
                 if (oX < 0)
-                {
                     x += HexMetrics.wrapSize;
-                }
                 else if (oX >= HexMetrics.wrapSize)
-                {
                     x -= HexMetrics.wrapSize;
-                }
             }
             this.x = x;
             this.z = z;
@@ -69,9 +65,7 @@ namespace StateOfClone.GameMap
                     (x < other.x ? other.x - x : x - other.x) +
                     (Y < other.Y ? other.Y - Y : Y - other.Y);
                 if (xyWrapped < xy)
-                {
                     xy = xyWrapped;
-                }
                 else
                 {
                     other.x -= 2 * HexMetrics.wrapSize;
@@ -79,9 +73,7 @@ namespace StateOfClone.GameMap
                         (x < other.x ? other.x - x : x - other.x) +
                         (Y < other.Y ? other.Y - Y : Y - other.Y);
                     if (xyWrapped < xy)
-                    {
                         xy = xyWrapped;
-                    }
                 }
             }
 
@@ -122,13 +114,9 @@ namespace StateOfClone.GameMap
                 float dZ = Mathf.Abs(-x - y - iZ);
 
                 if (dX > dY && dX > dZ)
-                {
                     iX = -iY - iZ;
-                }
                 else if (dZ > dY)
-                {
                     iZ = -iX - iY;
-                }
             }
 
             return new HexCoordinates(iX, iZ);

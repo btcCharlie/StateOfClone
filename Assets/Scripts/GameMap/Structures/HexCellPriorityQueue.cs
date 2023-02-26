@@ -27,13 +27,9 @@ namespace StateOfClone.GameMap
             count += 1;
             int priority = cell.SearchPriority;
             if (priority < minimum)
-            {
                 minimum = priority;
-            }
             while (priority >= list.Count)
-            {
                 list.Add(null);
-            }
             cell.NextWithSamePriority = list[priority];
             list[priority] = cell;
         }
@@ -67,9 +63,7 @@ namespace StateOfClone.GameMap
             HexCell current = list[oldPriority];
             HexCell next = current.NextWithSamePriority;
             if (current == cell)
-            {
                 list[oldPriority] = next;
-            }
             else
             {
                 while (next != cell)

@@ -30,6 +30,11 @@ namespace StateOfClone.GameMap
         public int Index { get; set; }
 
         /// <summary>
+        /// Map column index of the cell.
+        /// </summary>
+        public int ColumnIndex { get; set; }
+
+        /// <summary>
         /// Surface elevation level.
         /// </summary>
         public int Elevation
@@ -38,15 +43,11 @@ namespace StateOfClone.GameMap
             set
             {
                 if (elevation == value)
-                {
                     return;
-                }
                 int originalViewElevation = ViewElevation;
                 elevation = value;
                 if (ViewElevation != originalViewElevation)
-                {
                     ShaderData.ViewElevationChanged();
-                }
                 RefreshPosition();
                 Refresh();
             }
@@ -134,6 +135,31 @@ namespace StateOfClone.GameMap
             get => distance;
             set => distance = value;
         }
+
+        /// <summary>
+        /// Pathing data used by pathfinding algorithm.
+        /// </summary>
+        public HexCell PathFrom { get; set; }
+
+        /// <summary>
+        /// Heuristic data used by pathfinding algorithm.
+        /// </summary>
+        public int SearchHeuristic { get; set; }
+
+        /// <summary>
+        /// Search priority used by pathfinding algorithm.
+        /// </summary>
+        public int SearchPriority => distance + SearchHeuristic;
+
+        /// <summary>
+        /// Search phases data used by pathfinding algorithm.
+        /// </summary>
+        public int SearchPhase { get; set; }
+
+        /// <summary>
+        /// Linked list reference used by <see cref="HexCellPriorityQueue"/> for pathfinding.
+        /// </summary>
+        public HexCell NextWithSamePriority { get; set; }
 
         /// <summary>
         /// Reference to <see cref="HexCellShaderData"/> that contains the cell.

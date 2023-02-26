@@ -9,17 +9,17 @@ namespace StateOfClone.GameMap
     public class HexGridChunk : MonoBehaviour
     {
         [SerializeField]
-        private HexMesh terrain, water, waterShore;
+        HexMesh terrain, rivers, roads, water, waterShore, estuaries;
 
-        private HexCell[] cells;
+        HexCell[] cells;
 
-        private Canvas gridCanvas;
+        Canvas gridCanvas;
 
-        private static Color weights1 = new(1f, 0f, 0f);
-        private static Color weights2 = new(0f, 1f, 0f);
-        private static Color weights3 = new(0f, 0f, 1f);
+        static Color weights1 = new Color(1f, 0f, 0f);
+        static Color weights2 = new Color(0f, 1f, 0f);
+        static Color weights3 = new Color(0f, 0f, 1f);
 
-        private void Awake()
+        void Awake()
         {
             gridCanvas = GetComponentInChildren<Canvas>();
 
@@ -50,7 +50,7 @@ namespace StateOfClone.GameMap
         /// <param name="visible">Whether the UI should be visible.</param>
         public void ShowUI(bool visible) => gridCanvas.gameObject.SetActive(visible);
 
-        private void LateUpdate()
+        void LateUpdate()
         {
             Triangulate();
             enabled = false;
@@ -62,25 +62,31 @@ namespace StateOfClone.GameMap
         public void Triangulate()
         {
             terrain.Clear();
+            rivers.Clear();
+            roads.Clear();
             water.Clear();
             waterShore.Clear();
+            estuaries.Clear();
             for (int i = 0; i < cells.Length; i++)
                 Triangulate(cells[i]);
             terrain.Apply();
+            rivers.Apply();
+            roads.Apply();
             water.Apply();
             waterShore.Apply();
+            estuaries.Apply();
         }
 
-        void Triangulate(HexCell cell)
+        private void Triangulate(HexCell cell)
         {
             for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
                 Triangulate(d, cell);
         }
 
-        void Triangulate(HexDirection direction, HexCell cell)
+        private void Triangulate(HexDirection direction, HexCell cell)
         {
             Vector3 center = cell.Position;
-            EdgeVertices e = new EdgeVertices(
+            EdgeVertices e = new(
                 center + HexMetrics.GetFirstSolidCorner(direction),
                 center + HexMetrics.GetSecondSolidCorner(direction)
             );
@@ -94,7 +100,7 @@ namespace StateOfClone.GameMap
                 TriangulateWater(direction, cell, center);
         }
 
-        void TriangulateWater(
+        private void TriangulateWater(
             HexDirection direction, HexCell cell, Vector3 center
         )
         {
@@ -107,7 +113,7 @@ namespace StateOfClone.GameMap
                 TriangulateOpenWater(direction, cell, neighbor, center);
         }
 
-        void TriangulateOpenWater(
+        private void TriangulateOpenWater(
             HexDirection direction, HexCell cell, HexCell neighbor, Vector3 center
         )
         {
@@ -134,7 +140,6 @@ namespace StateOfClone.GameMap
                     HexCell nextNeighbor = cell.GetNeighbor(direction.Next());
                     if (nextNeighbor == null || !nextNeighbor.IsUnderwater)
                         return;
-
                     water.AddTriangle(
                         c2, e2, c2 + HexMetrics.GetWaterBridge(direction.Next())
                     );
@@ -146,11 +151,11 @@ namespace StateOfClone.GameMap
             }
         }
 
-        void TriangulateWaterShore(
+        private void TriangulateWaterShore(
             HexDirection direction, HexCell cell, HexCell neighbor, Vector3 center
         )
         {
-            EdgeVertices e1 = new(
+            EdgeVertices e1 = new EdgeVertices(
                 center + HexMetrics.GetFirstWaterCorner(direction),
                 center + HexMetrics.GetSecondWaterCorner(direction)
             );
@@ -167,6 +172,10 @@ namespace StateOfClone.GameMap
             water.AddTriangleCellData(indices, weights1);
 
             Vector3 center2 = neighbor.Position;
+            if (neighbor.ColumnIndex < cell.ColumnIndex - 1)
+                center2.x += HexMetrics.wrapSize * HexMetrics.innerDiameter;
+            else if (neighbor.ColumnIndex > cell.ColumnIndex + 1)
+                center2.x -= HexMetrics.wrapSize * HexMetrics.innerDiameter;
             center2.y = center.y;
             EdgeVertices e2 = new EdgeVertices(
                 center2 + HexMetrics.GetSecondSolidCorner(direction.Opposite()),
@@ -190,6 +199,10 @@ namespace StateOfClone.GameMap
             if (nextNeighbor != null)
             {
                 Vector3 center3 = nextNeighbor.Position;
+                if (nextNeighbor.ColumnIndex < cell.ColumnIndex - 1)
+                    center3.x += HexMetrics.wrapSize * HexMetrics.innerDiameter;
+                else if (nextNeighbor.ColumnIndex > cell.ColumnIndex + 1)
+                    center3.x -= HexMetrics.wrapSize * HexMetrics.innerDiameter;
                 Vector3 v3 = center3 + (nextNeighbor.IsUnderwater ?
                     HexMetrics.GetFirstWaterCorner(direction.Previous()) :
                     HexMetrics.GetFirstSolidCorner(direction.Previous()));
@@ -207,26 +220,93 @@ namespace StateOfClone.GameMap
             }
         }
 
-        void TriangulateWithoutRiver(
+        private void TriangulateEstuary(
+            EdgeVertices e1, EdgeVertices e2, bool incomingRiver, Vector3 indices
+        )
+        {
+            waterShore.AddTriangle(e2.v1, e1.v2, e1.v1);
+            waterShore.AddTriangle(e2.v5, e1.v5, e1.v4);
+            waterShore.AddTriangleUV(
+                new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(0f, 0f)
+            );
+            waterShore.AddTriangleUV(
+                new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(0f, 0f)
+            );
+            waterShore.AddTriangleCellData(indices, weights2, weights1, weights1);
+            waterShore.AddTriangleCellData(indices, weights2, weights1, weights1);
+
+            estuaries.AddQuad(e2.v1, e1.v2, e2.v2, e1.v3);
+            estuaries.AddTriangle(e1.v3, e2.v2, e2.v4);
+            estuaries.AddQuad(e1.v3, e1.v4, e2.v4, e2.v5);
+
+            estuaries.AddQuadUV(
+                new Vector2(0f, 1f), new Vector2(0f, 0f),
+                new Vector2(1f, 1f), new Vector2(0f, 0f)
+            );
+            estuaries.AddTriangleUV(
+                new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(1f, 1f)
+            );
+            estuaries.AddQuadUV(
+                new Vector2(0f, 0f), new Vector2(0f, 0f),
+                new Vector2(1f, 1f), new Vector2(0f, 1f)
+            );
+            estuaries.AddQuadCellData(
+                indices, weights2, weights1, weights2, weights1
+            );
+            estuaries.AddTriangleCellData(indices, weights1, weights2, weights2);
+            estuaries.AddQuadCellData(indices, weights1, weights2);
+
+            if (incomingRiver)
+            {
+                estuaries.AddQuadUV2(
+                    new Vector2(1.5f, 1f), new Vector2(0.7f, 1.15f),
+                    new Vector2(1f, 0.8f), new Vector2(0.5f, 1.1f)
+                );
+                estuaries.AddTriangleUV2(
+                    new Vector2(0.5f, 1.1f),
+                    new Vector2(1f, 0.8f),
+                    new Vector2(0f, 0.8f)
+                );
+                estuaries.AddQuadUV2(
+                    new Vector2(0.5f, 1.1f), new Vector2(0.3f, 1.15f),
+                    new Vector2(0f, 0.8f), new Vector2(-0.5f, 1f)
+                );
+            }
+            else
+            {
+                estuaries.AddQuadUV2(
+                    new Vector2(-0.5f, -0.2f), new Vector2(0.3f, -0.35f),
+                    new Vector2(0f, 0f), new Vector2(0.5f, -0.3f)
+                );
+                estuaries.AddTriangleUV2(
+                    new Vector2(0.5f, -0.3f),
+                    new Vector2(0f, 0f),
+                    new Vector2(1f, 0f)
+                );
+                estuaries.AddQuadUV2(
+                    new Vector2(0.5f, -0.3f), new Vector2(0.7f, -0.35f),
+                    new Vector2(1f, 0f), new Vector2(1.5f, -0.2f)
+                );
+            }
+        }
+
+        private void TriangulateWithoutRiver(
             HexDirection roadDirection, HexCell cell, Vector3 center, EdgeVertices e
         )
         {
             TriangulateEdgeFan(center, e, cell.Index);
         }
 
-        void TriangulateConnection(
+        private void TriangulateConnection(
             HexDirection direction, HexCell cell, EdgeVertices e1
         )
         {
             HexCell neighbor = cell.GetNeighbor(direction);
             if (neighbor == null)
-            {
                 return;
-            }
-
             Vector3 bridge = HexMetrics.GetBridge(direction);
             bridge.y = neighbor.Position.y - cell.Position.y;
-            EdgeVertices e2 = new EdgeVertices(
+            EdgeVertices e2 = new(
                 e1.v1 + bridge,
                 e1.v5 + bridge
             );
@@ -272,15 +352,31 @@ namespace StateOfClone.GameMap
             }
         }
 
-        void TriangulateCorner(
+        private void TriangulateWaterfallInWater(
+            Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4,
+            float y1, float y2, float waterY, Vector3 indices
+        )
+        {
+            v1.y = v2.y = y1;
+            v3.y = v4.y = y2;
+            v1 = HexMetrics.Perturb(v1);
+            v2 = HexMetrics.Perturb(v2);
+            v3 = HexMetrics.Perturb(v3);
+            v4 = HexMetrics.Perturb(v4);
+            float t = (waterY - y2) / (y1 - y2);
+            v3 = Vector3.Lerp(v3, v1, t);
+            v4 = Vector3.Lerp(v4, v2, t);
+            rivers.AddQuadUnperturbed(v1, v2, v3, v4);
+            rivers.AddQuadUV(0f, 1f, 0.8f, 1f);
+            rivers.AddQuadCellData(indices, weights1, weights2);
+        }
+
+        private void TriangulateCorner(
             Vector3 bottom, HexCell bottomCell,
             Vector3 left, HexCell leftCell,
             Vector3 right, HexCell rightCell
         )
         {
-            // HexEdgeType leftEdgeType = bottomCell.GetEdgeType(leftCell);
-            // HexEdgeType rightEdgeType = bottomCell.GetEdgeType(rightCell);
-
             terrain.AddTriangle(bottom, left, right);
             Vector3 indices;
             indices.x = bottomCell.Index;
@@ -289,37 +385,7 @@ namespace StateOfClone.GameMap
             terrain.AddTriangleCellData(indices, weights1, weights2, weights3);
         }
 
-        void TriangulateBoundaryTriangle(
-            Vector3 begin, Color beginWeights,
-            Vector3 left, Color leftWeights,
-            Vector3 boundary, Color boundaryWeights, Vector3 indices
-        )
-        {
-            // Vector3 v2 = HexMetrics.Perturb(HexMetrics.TerraceLerp(begin, left, 1));
-            // Color w2 = HexMetrics.TerraceLerp(beginWeights, leftWeights, 1);
-
-            // terrain.AddTriangleUnperturbed(HexMetrics.Perturb(begin), v2, boundary);
-            // terrain.AddTriangleCellData(indices, beginWeights, w2, boundaryWeights);
-
-            // for (int i = 2; i < HexMetrics.terraceSteps; i++)
-            // {
-            //     Vector3 v1 = v2;
-            //     Color w1 = w2;
-            //     v2 = HexMetrics.Perturb(HexMetrics.TerraceLerp(begin, left, i));
-            //     w2 = HexMetrics.TerraceLerp(beginWeights, leftWeights, i);
-            //     terrain.AddTriangleUnperturbed(v1, v2, boundary);
-            //     terrain.AddTriangleCellData(indices, w1, w2, boundaryWeights);
-            // }
-
-            terrain.AddTriangleUnperturbed(
-                HexMetrics.Perturb(begin), HexMetrics.Perturb(left), boundary
-                );
-            terrain.AddTriangleCellData(
-                indices, beginWeights, leftWeights, boundaryWeights
-                );
-        }
-
-        void TriangulateEdgeFan(Vector3 center, EdgeVertices edge, float index)
+        private void TriangulateEdgeFan(Vector3 center, EdgeVertices edge, float index)
         {
             terrain.AddTriangle(center, edge.v1, edge.v2);
             terrain.AddTriangle(center, edge.v2, edge.v3);
@@ -334,7 +400,7 @@ namespace StateOfClone.GameMap
             terrain.AddTriangleCellData(indices, weights1);
         }
 
-        void TriangulateEdgeStrip(
+        private void TriangulateEdgeStrip(
             EdgeVertices e1, Color w1, float index1,
             EdgeVertices e2, Color w2, float index2
         )

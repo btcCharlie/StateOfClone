@@ -51,7 +51,7 @@ namespace StateOfClone.GameMap
         /// <summary>
         /// Factor of the solid uniform region inside a hex cell.
         /// </summary>
-        public const float solidFactor = 0.8f;
+        public const float solidFactor = 0.7f;
 
         /// <summary>
         /// Factor of the blending region inside a hex cell.
@@ -138,9 +138,7 @@ namespace StateOfClone.GameMap
             Random.State currentState = Random.state;
             Random.InitState(seed);
             for (int i = 0; i < hashGrid.Length; i++)
-            {
                 hashGrid[i] = HexHash.Create();
-            }
             Random.state = currentState;
         }
 
@@ -153,14 +151,10 @@ namespace StateOfClone.GameMap
         {
             int x = (int)(position.x * hashGridScale) % hashGridSize;
             if (x < 0)
-            {
                 x += hashGridSize;
-            }
             int z = (int)(position.z * hashGridScale) % hashGridSize;
             if (z < 0)
-            {
                 z += hashGridSize;
-            }
             return hashGrid[x + z * hashGridSize];
         }
         #endregion
@@ -169,12 +163,12 @@ namespace StateOfClone.GameMap
         /// <summary>
         /// Strength of cell position terturbation.
         /// </summary>
-        public const float cellPerturbStrength = 4f;
+        public const float cellPerturbStrength = 1f;
 
         /// <summary>
         /// Strength of vertical elevation perturbation.
         /// </summary>
-        public const float elevationPerturbStrength = 1.5f;
+        public const float elevationPerturbStrength = 0f;
 
         /// <summary>
         /// Perturn a position.
@@ -296,14 +290,10 @@ namespace StateOfClone.GameMap
         public static HexEdgeType GetEdgeType(int elevation1, int elevation2)
         {
             if (elevation1 == elevation2)
-            {
                 return HexEdgeType.Flat;
-            }
             int delta = elevation2 - elevation1;
             if (delta == 1 || delta == -1)
-            {
                 return HexEdgeType.Slope;
-            }
             return HexEdgeType.Cliff;
         }
     }

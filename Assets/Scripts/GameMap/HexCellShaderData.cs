@@ -118,9 +118,7 @@ namespace StateOfClone.GameMap
 
             int delta = (int)(Time.deltaTime * transitionSpeed);
             if (delta == 0)
-            {
                 delta = 1;
-            }
             for (int i = 0; i < transitioningCells.Count; i++)
             {
                 if (!UpdateCellData(transitioningCells[i], delta))

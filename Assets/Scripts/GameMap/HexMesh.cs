@@ -5,14 +5,12 @@ using StateOfClone.Core;
 
 namespace StateOfClone.GameMap
 {
-
     /// <summary>
     /// Class containing all data used to generate a mesh while triangulating a hex map.
     /// </summary>
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class HexMesh : MonoBehaviour
     {
-
         [SerializeField]
         bool useCollider, useCellData, useUVCoordinates, useUV2Coordinates;
 
@@ -28,9 +26,7 @@ namespace StateOfClone.GameMap
         {
             GetComponent<MeshFilter>().mesh = hexMesh = new Mesh();
             if (useCollider)
-            {
                 meshCollider = gameObject.AddComponent<MeshCollider>();
-            }
             hexMesh.name = "Hex Mesh";
         }
 
@@ -47,13 +43,9 @@ namespace StateOfClone.GameMap
                 cellIndices = ListPool<Vector3>.Get();
             }
             if (useUVCoordinates)
-            {
                 uvs = ListPool<Vector2>.Get();
-            }
             if (useUV2Coordinates)
-            {
                 uv2s = ListPool<Vector2>.Get();
-            }
             triangles = ListPool<int>.Get();
         }
 
@@ -85,9 +77,7 @@ namespace StateOfClone.GameMap
             ListPool<int>.Add(triangles);
             hexMesh.RecalculateNormals();
             if (useCollider)
-            {
                 meshCollider.sharedMesh = hexMesh;
-            }
         }
 
         /// <summary>
