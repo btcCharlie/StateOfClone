@@ -72,7 +72,7 @@ namespace StateOfClone.GameMap
             HexMetrics.InitializeHashGrid(seed);
             cellShaderData = gameObject.AddComponent<HexCellShaderData>();
             cellShaderData.Grid = this;
-            CreateMap(CellCountX, CellCountZ, Wrapping);
+            CreateMap(CellCountX, CellCountZ, false);
         }
 
         /// <summary>
