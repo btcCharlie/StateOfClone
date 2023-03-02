@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -25,10 +26,10 @@ namespace StateOfClone.GameMap
         private HexGrid grid;
 
         [SerializeField] private PlayerInput playerInput;
-        private InputAction scrollAction, zoomAction, rotateAction;
+        private InputAction scrollAction, zoomAction, zoomIncrementAction, rotateAction;
         private Vector2 moveInput;
         private float rotationInput;
-        private bool shouldMove, shouldRotate;
+        private bool shouldMove, shouldRotate, shouldZoom;
 
         private Transform swivel, stick;
 
@@ -58,13 +59,20 @@ namespace StateOfClone.GameMap
 
             scrollAction = playerInput.actions["MapScroll"];
             zoomAction = playerInput.actions["MapZoom"];
+            zoomIncrementAction = playerInput.actions["MapZoomIncrement"];
             rotateAction = playerInput.actions["MapRotate"];
+        }
+
+        private void Start()
+        {
+            AdjustZoom();
         }
 
         private void OnEnable()
         {
-            Debug.Log("OnEnable MapCamera");
             zoomAction.performed += OnZoom;
+            zoomAction.performed += OnZoomIncrement;
+            zoomAction.canceled += OnZoomIncrement;
             scrollAction.performed += OnScroll;
             scrollAction.canceled += OnScroll;
             rotateAction.performed += OnRotation;
@@ -77,6 +85,8 @@ namespace StateOfClone.GameMap
         private void OnDisable()
         {
             zoomAction.performed -= OnZoom;
+            zoomAction.performed -= OnZoomIncrement;
+            zoomAction.canceled -= OnZoomIncrement;
             scrollAction.performed -= OnScroll;
             scrollAction.canceled -= OnScroll;
             rotateAction.performed -= OnRotation;
@@ -90,36 +100,37 @@ namespace StateOfClone.GameMap
 
             if (shouldRotate)
                 AdjustRotation();
+
+            if (shouldZoom)
+                AdjustZoom();
         }
 
         // AdjustPosition in tutorial
         private void OnScroll(InputAction.CallbackContext context)
         {
-            Debug.Log("OnMove");
             moveInput = context.ReadValue<Vector2>();
             shouldMove = context.performed;
         }
 
         private void OnRotation(InputAction.CallbackContext context)
         {
-            Debug.Log("OnRotation");
             rotationInput = context.ReadValue<float>();
             shouldRotate = context.performed;
         }
 
         private void OnZoom(InputAction.CallbackContext context)
         {
-            Debug.Log("OnZoom");
             float zoomDelta = context.ReadValue<float>();
-            // if (zoomDelta == 0f) return;
 
             // AdjustZoom in tutorial
             zoom = Mathf.Clamp01(zoom + zoomDelta);
-            float distance = Mathf.Lerp(stickMinZoom, stickMaxZoom, zoom);
-            stick.localPosition = new Vector3(0f, 0f, distance);
 
-            float angle = Mathf.Lerp(swivelMinZoom, swivelMaxZoom, zoom);
-            swivel.localRotation = Quaternion.Euler(angle, 0f, 0f);
+            AdjustZoom();
+        }
+
+        private void OnZoomIncrement(InputAction.CallbackContext context)
+        {
+            shouldZoom = context.performed;
         }
 
         private void AdjustRotation()
@@ -134,10 +145,6 @@ namespace StateOfClone.GameMap
 
         private void AdjustPosition()
         {
-            // Vector3 direction =
-            //     transform.localRotation *
-            //     new Vector3(xDelta, 0f, zDelta).normalized;
-
             Vector3 direction = new(moveInput.x, 0f, moveInput.y);
             float damping = Mathf.Max(Mathf.Abs(moveInput.x), Mathf.Abs(moveInput.y));
             float distance =
@@ -148,6 +155,15 @@ namespace StateOfClone.GameMap
             position += transform.localRotation * direction * distance;
             transform.localPosition =
                 grid.Wrapping ? WrapPosition(position) : ClampPosition(position);
+        }
+
+        private void AdjustZoom()
+        {
+            float distance = Mathf.Lerp(stickMinZoom, stickMaxZoom, zoom);
+            stick.localPosition = new Vector3(0f, 0f, distance);
+
+            float angle = Mathf.Lerp(swivelMinZoom, swivelMaxZoom, zoom);
+            swivel.localRotation = Quaternion.Euler(angle, 0f, 0f);
         }
 
         private Vector3 ClampPosition(Vector3 position)
