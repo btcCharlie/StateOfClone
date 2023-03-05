@@ -311,6 +311,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: a8334952-2fe6-4e73-846f-9a571c0e21b3
     m_ActionName: GameMap/MapRotate[/Keyboard/q,/Keyboard/e]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: af5129d0-e777-490a-82a2-4ca73ac643f6
+    m_ActionName: GameMap/MapZoomIncrement[/Keyboard/numpadPlus,/Keyboard/numpadMinus]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard
   m_DefaultActionMap: GameMap
@@ -460,6 +464,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d00410778c7f74439dc8b868430a493, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <CellCountX>k__BackingField: 60
+  <CellCountZ>k__BackingField: 45
   cellPrefab: {fileID: 9167677554356034566, guid: f0c5ce70a99775a40bff019f4dc3ab62,
     type: 3}
   cellLabelPrefab: {fileID: 176849114814397810, guid: 65a8967d8cdaf724ca44634b7e2b2e07,

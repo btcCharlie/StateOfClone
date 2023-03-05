@@ -1,0 +1,16 @@
+{
+    "name": "Units",
+    "rootNamespace": "StateOfClone.Units",
+    "references": [
+        "GUID:9273c36cbff67ef4bb16d6eba10e674f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

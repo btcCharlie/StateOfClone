@@ -7,7 +7,7 @@ namespace StateOfClone.GameMap
     /// <summary>
     /// Container component for hex cell data.
     /// </summary>
-    public class HexCell : MonoBehaviour
+    public class HexCell : MonoBehaviour, IHexCell
     {
         /// <summary>
         /// Hexagonal coordinates unique to the cell.

@@ -9,8 +9,18 @@ namespace StateOfClone.GameMap
     /// <summary>
     /// Component that represents an entire hexagon map.
     /// </summary>
-    public class HexGrid : MonoBehaviour
+    public class HexGrid : MonoBehaviour, IHexGrid
     {
+        /// <summary>
+        /// Amount of cells in the X dimension.
+        /// </summary>
+        [field: SerializeField] public int CellCountX { get; private set; }
+
+        /// <summary>
+        /// Amount of cells in the Z dimension.
+        /// </summary>
+        [field: SerializeField] public int CellCountZ { get; private set; }
+
         [SerializeField]
         HexCell cellPrefab;
 
@@ -25,16 +35,6 @@ namespace StateOfClone.GameMap
 
         [SerializeField]
         int seed;
-
-        /// <summary>
-        /// Amount of cells in the X dimension.
-        /// </summary>
-        public int CellCountX { get; private set; }
-
-        /// <summary>
-        /// Amount of cells in the Z dimension.
-        /// </summary>
-        public int CellCountZ { get; private set; }
 
         /// <summary>
         /// Whether there currently exists a path that should be displayed.
@@ -66,8 +66,8 @@ namespace StateOfClone.GameMap
         void Awake()
         {
             Shader.EnableKeyword("_HEX_MAP_EDIT_MODE");
-            CellCountX = 20;
-            CellCountZ = 15;
+            // CellCountX = 20;
+            // CellCountZ = 15;
             HexMetrics.noiseSource = noiseSource;
             HexMetrics.InitializeHashGrid(seed);
             cellShaderData = gameObject.AddComponent<HexCellShaderData>();
