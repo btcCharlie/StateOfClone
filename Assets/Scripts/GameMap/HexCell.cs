@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
+using StateOfClone.Core;
 
 namespace StateOfClone.GameMap
 {
@@ -22,7 +23,7 @@ namespace StateOfClone.GameMap
         /// <summary>
         /// Grid chunk that contains the cell.
         /// </summary>
-        public HexGridChunk Chunk { get; set; }
+        public IHexGridChunk Chunk { get; set; }
 
         /// <summary>
         /// Unique global index of the cell.
@@ -139,7 +140,7 @@ namespace StateOfClone.GameMap
         /// <summary>
         /// Pathing data used by pathfinding algorithm.
         /// </summary>
-        public HexCell PathFrom { get; set; }
+        public IHexCell PathFrom { get; set; }
 
         /// <summary>
         /// Heuristic data used by pathfinding algorithm.
@@ -159,12 +160,14 @@ namespace StateOfClone.GameMap
         /// <summary>
         /// Linked list reference used by <see cref="HexCellPriorityQueue"/> for pathfinding.
         /// </summary>
-        public HexCell NextWithSamePriority { get; set; }
+        public IHexCell NextWithSamePriority { get; set; }
 
         /// <summary>
         /// Reference to <see cref="HexCellShaderData"/> that contains the cell.
         /// </summary>
-        public HexCellShaderData ShaderData { get; set; }
+        public IHexCellShaderData ShaderData { get; set; }
+
+        public new Transform transform => base.transform;
 
         private int terrainTypeIndex;
 
@@ -220,17 +223,21 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="direction">Neighbor direction relative to the cell.</param>
         /// <returns>Neighbor cell, if it exists.</returns>
-        public HexCell GetNeighbor(HexDirection direction) => neighbors[(int)direction];
+        public IHexCell GetNeighbor(HexDirection direction) => neighbors[(int)direction];
 
         /// <summary>
         /// Set a specific neighbor.
         /// </summary>
         /// <param name="direction">Neighbor direction relative to the cell.</param>
         /// <param name="cell">Neighbor.</param>
-        public void SetNeighbor(HexDirection direction, HexCell cell)
+        public void SetNeighbor(HexDirection direction, IHexCell cell)
         {
-            neighbors[(int)direction] = cell;
-            cell.neighbors[(int)direction.Opposite()] = this;
+            if (neighbors[(int)direction] == (HexCell)cell)
+                return;
+
+            neighbors[(int)direction] = (HexCell)cell;
+            cell.SetNeighbor(direction.Opposite(), this);
+            // cell.neighbors[(int)direction.Opposite()] = this;
         }
 
         /// <summary>
@@ -238,7 +245,7 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="direction">Edge direction relative to the cell.</param>
         /// <returns><see cref="HexEdgeType"/> based on the neighboring cells.</returns>
-        public HexEdgeType GetEdgeType(HexDirection direction) => HexMetrics.GetEdgeType(
+        public HexEdgeType GetEdgeType(HexDirection direction) => HexHelper.GetEdgeType(
             elevation, neighbors[(int)direction].elevation
         );
 
@@ -247,8 +254,8 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="otherCell">Other cell to consider as neighbor.</param>
         /// <returns><see cref="HexEdgeType"/> based on this and the other cell.</returns>
-        public HexEdgeType GetEdgeType(HexCell otherCell) => HexMetrics.GetEdgeType(
-            elevation, otherCell.elevation
+        public HexEdgeType GetEdgeType(IHexCell otherCell) => HexHelper.GetEdgeType(
+            elevation, otherCell.Elevation
         );
 
         /// <summary>
@@ -258,7 +265,7 @@ namespace StateOfClone.GameMap
         /// <returns>Absolute elevation difference.</returns>
         public int GetElevationDifference(HexDirection direction)
         {
-            int difference = elevation - GetNeighbor(direction).elevation;
+            int difference = elevation - GetNeighbor(direction).Elevation;
             return difference >= 0 ? difference : -difference;
         }
 
@@ -278,12 +285,12 @@ namespace StateOfClone.GameMap
 
         void Refresh()
         {
-            if (Chunk)
+            if (Chunk != null)
             {
                 Chunk.Refresh();
                 for (int i = 0; i < neighbors.Length; i++)
                 {
-                    HexCell neighbor = neighbors[i];
+                    IHexCell neighbor = neighbors[i];
                     if (neighbor != null && neighbor.Chunk != Chunk)
                         neighbor.Chunk.Refresh();
                 }

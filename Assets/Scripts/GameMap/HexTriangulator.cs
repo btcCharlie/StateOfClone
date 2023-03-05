@@ -1,4 +1,5 @@
 using UnityEngine;
+using StateOfClone.Core;
 
 namespace StateOfClone.GameMap
 {
@@ -7,7 +8,7 @@ namespace StateOfClone.GameMap
     /// </summary>
     public class HexTriangulator
     {
-        private HexMesh _terrain, _rivers, _roads, _water, _waterShore, _estuaries;
+        private readonly HexMesh _terrain, _rivers, _roads, _water, _waterShore, _estuaries;
 
         private static Color weights1 = new(1f, 0f, 0f);
         private static Color weights2 = new(0f, 1f, 0f);
@@ -29,7 +30,7 @@ namespace StateOfClone.GameMap
         /// <summary>
         /// Triangulate everything in the chunk.
         /// </summary>
-        public void Triangulate(HexCell[] cells)
+        public void Triangulate(IHexCell[] cells)
         {
             _terrain.Clear();
             _rivers.Clear();
@@ -38,7 +39,7 @@ namespace StateOfClone.GameMap
             _waterShore.Clear();
             _estuaries.Clear();
             for (int i = 0; i < cells.Length; i++)
-                Triangulate(cells[i]);
+                Triangulate((HexCell)cells[i]);
             _terrain.Apply();
             _rivers.Apply();
             _roads.Apply();
@@ -76,7 +77,7 @@ namespace StateOfClone.GameMap
         {
             center.y = cell.WaterSurfaceY;
 
-            HexCell neighbor = cell.GetNeighbor(direction);
+            HexCell neighbor = (HexCell)cell.GetNeighbor(direction);
             if (neighbor != null && !neighbor.IsUnderwater)
                 TriangulateWaterShore(direction, cell, neighbor, center);
             else
@@ -107,7 +108,7 @@ namespace StateOfClone.GameMap
 
                 if (direction <= HexDirection.E)
                 {
-                    HexCell nextNeighbor = cell.GetNeighbor(direction.Next());
+                    HexCell nextNeighbor = (HexCell)cell.GetNeighbor(direction.Next());
                     if (nextNeighbor == null || !nextNeighbor.IsUnderwater)
                         return;
                     _water.AddTriangle(
@@ -165,7 +166,7 @@ namespace StateOfClone.GameMap
             _waterShore.AddQuadCellData(indices, weights1, weights2);
             _waterShore.AddQuadCellData(indices, weights1, weights2);
 
-            HexCell nextNeighbor = cell.GetNeighbor(direction.Next());
+            HexCell nextNeighbor = (HexCell)cell.GetNeighbor(direction.Next());
             if (nextNeighbor != null)
             {
                 Vector3 center3 = nextNeighbor.Position;
@@ -271,7 +272,7 @@ namespace StateOfClone.GameMap
             HexDirection direction, HexCell cell, EdgeVertices e1
         )
         {
-            HexCell neighbor = cell.GetNeighbor(direction);
+            HexCell neighbor = (HexCell)cell.GetNeighbor(direction);
             if (neighbor == null)
                 return;
             Vector3 bridge = HexMetrics.GetBridge(direction);
@@ -286,7 +287,7 @@ namespace StateOfClone.GameMap
                 e2, weights2, neighbor.Index
             );
 
-            HexCell nextNeighbor = cell.GetNeighbor(direction.Next());
+            HexCell nextNeighbor = (HexCell)cell.GetNeighbor(direction.Next());
             if (direction <= HexDirection.E && nextNeighbor != null)
             {
                 Vector3 v5 = e1.v5 + HexMetrics.GetBridge(direction.Next());

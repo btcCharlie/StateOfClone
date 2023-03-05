@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using StateOfClone.Core;
 
 namespace StateOfClone.GameMap
 {
@@ -8,7 +9,7 @@ namespace StateOfClone.GameMap
     public class HexCellPriorityQueue
     {
 
-        List<HexCell> list = new();
+        List<IHexCell> list = new();
 
         int count = 0;
         int minimum = int.MaxValue;
@@ -22,7 +23,7 @@ namespace StateOfClone.GameMap
         /// Add a cell to the queue.
         /// </summary>
         /// <param name="cell">Cell to add.</param>
-        public void Enqueue(HexCell cell)
+        public void Enqueue(IHexCell cell)
         {
             count += 1;
             int priority = cell.SearchPriority;
@@ -38,12 +39,12 @@ namespace StateOfClone.GameMap
         /// Remove a cell from the queue.
         /// </summary>
         /// <returns>The cell with the highest priority.</returns>
-        public HexCell Dequeue()
+        public IHexCell Dequeue()
         {
             count -= 1;
             for (; minimum < list.Count; minimum++)
             {
-                HexCell cell = list[minimum];
+                IHexCell cell = list[minimum];
                 if (cell != null)
                 {
                     list[minimum] = cell.NextWithSamePriority;
@@ -58,10 +59,10 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="cell">Cell to update</param>
         /// <param name="oldPriority">Priority of the cell before it was changed.</param>
-        public void Change(HexCell cell, int oldPriority)
+        public void Change(IHexCell cell, int oldPriority)
         {
-            HexCell current = list[oldPriority];
-            HexCell next = current.NextWithSamePriority;
+            IHexCell current = list[oldPriority];
+            IHexCell next = current.NextWithSamePriority;
             if (current == cell)
                 list[oldPriority] = next;
             else

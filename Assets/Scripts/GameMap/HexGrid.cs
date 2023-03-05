@@ -48,7 +48,7 @@ namespace StateOfClone.GameMap
 
         Transform[] columns;
         HexGridChunk[] chunks;
-        HexCell[] cells;
+        IHexCell[] cells;
 
         int chunkCountX, chunkCountZ;
 
@@ -56,7 +56,7 @@ namespace StateOfClone.GameMap
 
         int searchFrontierPhase;
 
-        HexCell currentPathFrom, currentPathTo;
+        IHexCell currentPathFrom, currentPathTo;
         bool currentPathExists;
 
         int currentCenterColumnIndex = -1;
@@ -144,7 +144,7 @@ namespace StateOfClone.GameMap
 
         void CreateCells()
         {
-            cells = new HexCell[CellCountZ * CellCountX];
+            cells = new IHexCell[CellCountZ * CellCountX];
 
             for (int z = 0, i = 0; z < CellCountZ; z++)
             {
@@ -169,7 +169,7 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="ray"><see cref="Ray"/> used to perform a raycast.</param>
         /// <returns>The hit cell, if any.</returns>
-        public HexCell GetCell(Ray ray)
+        public IHexCell GetCell(Ray ray)
         {
             if (Physics.Raycast(ray, out RaycastHit hit))
                 return GetCell(hit.point);
@@ -181,7 +181,7 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="position">Position to check.</param>
         /// <returns>The cell containing the position, if it exists.</returns>
-        public HexCell GetCell(Vector3 position)
+        public IHexCell GetCell(Vector3 position)
         {
             position = transform.InverseTransformPoint(position);
             HexCoordinates coordinates = HexCoordinates.FromPosition(position);
@@ -193,7 +193,7 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="coordinates"><see cref="HexCoordinates"/> of the cell.</param>
         /// <returns>The cell with the given coordinates, if it exists.</returns>
-        public HexCell GetCell(HexCoordinates coordinates)
+        public IHexCell GetCell(HexCoordinates coordinates)
         {
             int z = coordinates.Z;
             if (z < 0 || z >= CellCountZ)
@@ -210,7 +210,7 @@ namespace StateOfClone.GameMap
         /// <param name="xOffset">X array offset coordinate.</param>
         /// <param name="zOffset">Z array offset coordinate.</param>
         /// <returns></returns>
-        public HexCell GetCell(int xOffset, int zOffset) =>
+        public IHexCell GetCell(int xOffset, int zOffset) =>
             cells[xOffset + zOffset * CellCountX];
 
         /// <summary>
@@ -218,7 +218,7 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="cellIndex">Cell index, which should be valid.</param>
         /// <returns>The indicated cell.</returns>
-        public HexCell GetCell(int cellIndex) => cells[cellIndex];
+        public IHexCell GetCell(int cellIndex) => cells[cellIndex];
 
         /// <summary>
         /// Control whether the map UI should be visible or hidden.
@@ -237,7 +237,8 @@ namespace StateOfClone.GameMap
             position.y = 0f;
             position.z = z * (HexMetrics.outerRadius * 1.5f);
 
-            HexCell cell = cells[i] = Instantiate<HexCell>(cellPrefab);
+            IHexCell cell = Instantiate<HexCell>(cellPrefab);
+            cells[i] = cell;
             cell.transform.localPosition = position;
             cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
             cell.Index = i;
@@ -290,7 +291,7 @@ namespace StateOfClone.GameMap
             AddCellToChunk(x, z, cell);
         }
 
-        void AddCellToChunk(int x, int z, HexCell cell)
+        void AddCellToChunk(int x, int z, IHexCell cell)
         {
             int chunkX = x / HexMetrics.chunkSizeX;
             int chunkZ = z / HexMetrics.chunkSizeZ;
@@ -351,12 +352,12 @@ namespace StateOfClone.GameMap
         /// Get a list of cells representing the currently visible path.
         /// </summary>
         /// <returns>The current path list, if a visible path exists.</returns>
-        public List<HexCell> GetPath()
+        public List<IHexCell> GetPath()
         {
             if (!currentPathExists)
                 return null;
-            List<HexCell> path = ListPool<HexCell>.Get();
-            for (HexCell cell = currentPathTo; cell != currentPathFrom; cell = cell.PathFrom)
+            List<IHexCell> path = ListPool<IHexCell>.Get();
+            for (IHexCell cell = currentPathTo; cell != currentPathFrom; cell = cell.PathFrom)
                 path.Add(cell);
             path.Add(currentPathFrom);
             path.Reverse();
@@ -370,7 +371,7 @@ namespace StateOfClone.GameMap
         {
             if (currentPathExists)
             {
-                HexCell current = currentPathTo;
+                IHexCell current = currentPathTo;
                 while (current != currentPathFrom)
                 {
                     current.SetLabel(null);
@@ -380,7 +381,7 @@ namespace StateOfClone.GameMap
                 current.DisableHighlight();
                 currentPathExists = false;
             }
-            else if (currentPathFrom)
+            else if (currentPathFrom != null)
             {
                 currentPathFrom.DisableHighlight();
                 currentPathTo.DisableHighlight();
@@ -392,7 +393,7 @@ namespace StateOfClone.GameMap
         {
             if (currentPathExists)
             {
-                HexCell current = currentPathTo;
+                IHexCell current = currentPathTo;
                 while (current != currentPathFrom)
                 {
                     int turn = (current.Distance - 1) / speed;
@@ -411,7 +412,7 @@ namespace StateOfClone.GameMap
         /// <param name="fromCell">Cell to start the search from.</param>
         /// <param name="toCell">Cell to find a path towards.</param>
         /// <param name="unit">Unit for which the path is.</param>
-        public void FindPath(HexCell fromCell, HexCell toCell, IHexUnit unit)
+        public void FindPath(IHexCell fromCell, IHexCell toCell, IHexUnit unit)
         {
             ClearPath();
             currentPathFrom = fromCell;
@@ -420,7 +421,7 @@ namespace StateOfClone.GameMap
             ShowPath(unit.Speed);
         }
 
-        bool Search(HexCell fromCell, HexCell toCell, IHexUnit unit)
+        private bool Search(IHexCell fromCell, IHexCell toCell, IHexUnit unit)
         {
             int speed = unit.Speed;
             searchFrontierPhase += 2;
@@ -433,7 +434,7 @@ namespace StateOfClone.GameMap
             searchFrontier.Enqueue(fromCell);
             while (searchFrontier.Count > 0)
             {
-                HexCell current = searchFrontier.Dequeue();
+                IHexCell current = searchFrontier.Dequeue();
                 current.SearchPhase += 1;
 
                 if (current == toCell)
@@ -442,7 +443,7 @@ namespace StateOfClone.GameMap
 
                 for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
                 {
-                    HexCell neighbor = current.GetNeighbor(d);
+                    IHexCell neighbor = current.GetNeighbor(d);
                     if (
                         neighbor == null ||
                         neighbor.SearchPhase > searchFrontierPhase
@@ -483,12 +484,12 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="fromCell">Cell from which to start viewing.</param>
         /// <param name="range">Visibility range.</param>
-        public void IncreaseVisibility(HexCell fromCell, int range)
+        public void IncreaseVisibility(IHexCell fromCell, int range)
         {
-            List<HexCell> cells = GetVisibleCells(fromCell, range);
+            List<IHexCell> cells = GetVisibleCells(fromCell, range);
             for (int i = 0; i < cells.Count; i++)
                 cells[i].IncreaseVisibility();
-            ListPool<HexCell>.Add(cells);
+            ListPool<IHexCell>.Add(cells);
         }
 
         /// <summary>
@@ -496,12 +497,12 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="fromCell">Cell from which to stop viewing.</param>
         /// <param name="range">Visibility range.</param>
-        public void DecreaseVisibility(HexCell fromCell, int range)
+        public void DecreaseVisibility(IHexCell fromCell, int range)
         {
-            List<HexCell> cells = GetVisibleCells(fromCell, range);
+            List<IHexCell> cells = GetVisibleCells((IHexCell)fromCell, range);
             for (int i = 0; i < cells.Count; i++)
                 cells[i].DecreaseVisibility();
-            ListPool<HexCell>.Add(cells);
+            ListPool<IHexCell>.Add(cells);
         }
 
         /// <summary>
@@ -513,9 +514,9 @@ namespace StateOfClone.GameMap
                 cells[i].ResetVisibility();
         }
 
-        List<HexCell> GetVisibleCells(HexCell fromCell, int range)
+        List<IHexCell> GetVisibleCells(IHexCell fromCell, int range)
         {
-            List<HexCell> visibleCells = ListPool<HexCell>.Get();
+            List<IHexCell> visibleCells = ListPool<IHexCell>.Get();
 
             searchFrontierPhase += 2;
             if (searchFrontier == null)
@@ -529,13 +530,13 @@ namespace StateOfClone.GameMap
             HexCoordinates fromCoordinates = fromCell.Coordinates;
             while (searchFrontier.Count > 0)
             {
-                HexCell current = searchFrontier.Dequeue();
+                IHexCell current = searchFrontier.Dequeue();
                 current.SearchPhase += 1;
                 visibleCells.Add(current);
 
                 for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
                 {
-                    HexCell neighbor = current.GetNeighbor(d);
+                    IHexCell neighbor = current.GetNeighbor(d);
                     if (
                         neighbor == null ||
                         neighbor.SearchPhase > searchFrontierPhase ||

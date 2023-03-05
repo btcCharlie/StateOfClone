@@ -1,23 +1,24 @@
 using System.Collections.Generic;
 using UnityEngine;
+using StateOfClone.Core;
 
 namespace StateOfClone.GameMap
 {
     /// <summary>
     /// Component that manages cell data used by shaders.
     /// </summary>
-    public class HexCellShaderData : MonoBehaviour
+    public class HexCellShaderData : MonoBehaviour, IHexCellShaderData
     {
 
         private const float transitionSpeed = 255f;
 
         private Texture2D cellTexture;
         private Color32[] cellTextureData;
-        private readonly List<HexCell> transitioningCells = new();
+        private readonly List<IHexCell> transitioningCells = new();
 
         private bool needsVisibilityReset;
 
-        public HexGrid Grid { get; set; }
+        public IHexGrid Grid { get; set; }
 
         public bool ImmediateMode { get; set; }
 
@@ -61,7 +62,7 @@ namespace StateOfClone.GameMap
         /// Refresh the terrain data of a cell.
         /// </summary>
         /// <param name="cell">Cell with changed terrain type.</param>
-        public void RefreshTerrain(HexCell cell)
+        public void RefreshTerrain(IHexCell cell)
         {
             cellTextureData[cell.Index].a = (byte)cell.TerrainTypeIndex;
             enabled = true;
@@ -71,7 +72,7 @@ namespace StateOfClone.GameMap
         /// Refresh visibility of a cell.
         /// </summary>
         /// <param name="cell">Cell with changed visibility.</param>
-        public void RefreshVisibility(HexCell cell)
+        public void RefreshVisibility(IHexCell cell)
         {
             int index = cell.Index;
             if (ImmediateMode)
@@ -92,7 +93,7 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="cell">Cell to apply data for.</param>
         /// <param name="data">Cell data value.</param>
-        public void SetMapData(HexCell cell, float data)
+        public void SetMapData(IHexCell cell, float data)
         {
             cellTextureData[cell.Index].b =
                 data < 0f ? (byte)0 : (data < 1f ? (byte)(data * 254f) : (byte)254);
@@ -134,7 +135,7 @@ namespace StateOfClone.GameMap
             enabled = transitioningCells.Count > 0;
         }
 
-        private bool UpdateCellData(HexCell cell, int delta)
+        private bool UpdateCellData(IHexCell cell, int delta)
         {
             int index = cell.Index;
             Color32 data = cellTextureData[index];

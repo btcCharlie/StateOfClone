@@ -1,4 +1,4 @@
-namespace StateOfClone.GameMap
+namespace StateOfClone.Core
 {
     /// <summary>
     /// Hexagon edge type, determined by absolute elevation difference of adjacent cells.
