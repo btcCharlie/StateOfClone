@@ -97,7 +97,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 221}
   m_MaxSize: {x: 4000, y: 4021}
   vertical: 0
-  controlID: 76
+  controlID: 43
 --- !u!114 &5
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -122,7 +122,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 200}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 67
+  controlID: 115
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -142,8 +142,8 @@ MonoBehaviour:
     y: 0
     width: 519
     height: 1299
-  m_MinSize: {x: 276, y: 71}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 275, y: 50}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 19}
   m_Panes:
   - {fileID: 19}
@@ -298,7 +298,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 200}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 68
+  controlID: 116
 --- !u!114 &13
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -323,7 +323,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 69
+  controlID: 117
 --- !u!114 &14
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -343,8 +343,8 @@ MonoBehaviour:
     y: 0
     width: 1539
     height: 770
-  m_MinSize: {x: 202, y: 221}
-  m_MaxSize: {x: 4002, y: 4021}
+  m_MinSize: {x: 200, y: 200}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 21}
   m_Panes:
   - {fileID: 21}
@@ -1772,22 +1772,22 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scripts/GameMap
+    - Assets/Scripts/Units
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Scripts/GameMap
+  - Assets/Scripts/Units
   m_LastFoldersGridSize: -1
   m_LastProjectPath: K:\Unity\Projects\StateOfClone
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: c6680000
-    m_LastClickedID: 26822
-    m_ExpandedIDs: 00000000c0680000c2680000c4680000c668000000ca9a3b
+    m_SelectedIDs: 8c6a0000
+    m_LastClickedID: 27276
+    m_ExpandedIDs: 00000000c0680000c2680000c4680000c087000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1843,7 +1843,7 @@ MonoBehaviour:
     m_SelectedInstanceIDs: 
     m_LastClickedInstanceID: 0
     m_HadKeyboardFocusLastEvent: 1
-    m_ExpandedInstanceIDs: c623000004680000
+    m_ExpandedInstanceIDs: c62300000468000000000000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1947,7 +1947,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 30fbffff
+      m_ExpandedIDs: 9228f0ff5e4df0ffe67ff3ff867af6ff60d0f6ffbed0f6ffded4f6fffed8f6ff1eddf6ff3ee1f6ffb8e6f6ffbee6f6ff46edf6ff8af5f6ffb6f5f6ffee09f8ff1e0af8ffaa3bf9ff3e0ffaff440ffaff1034faff0035fcff5e6afcff646afcff346dfcff365bfdffb660fdff0280fdff1280fdff30fbffff00680000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -2049,7 +2049,7 @@ MonoBehaviour:
       floating: 0
       collapsed: 0
       displayed: 1
-      snapOffset: {x: 0, y: 0}
+      snapOffset: {x: 0, y: 25}
       snapOffsetDelta: {x: 0, y: 0}
       snapCorner: 0
       id: unity-transform-toolbar
@@ -2230,9 +2230,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 702.6201, y: 564.5101, z: 203.16968}
+    m_Target: {x: 3.0310936, y: 6.484642, z: 5.2104006}
     speed: 2
-    m_Value: {x: 702.6201, y: 564.5101, z: 203.16968}
+    m_Value: {x: 3.0310936, y: 6.484642, z: 5.2104006}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -2279,13 +2279,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.13783674, y: 0.85504484, z: -0.28887656, w: -0.4079826}
+    m_Target: {x: 0.34042537, y: 0.0676138, z: -0.024551565, w: 0.93751633}
     speed: 2
-    m_Value: {x: -0.13783674, y: 0.85504484, z: -0.28887656, w: -0.4079826}
+    m_Value: {x: 0.34042525, y: 0.06761378, z: -0.024551556, w: 0.937516}
   m_Size:
-    m_Target: 821.31006
+    m_Target: 18.307709
     speed: 2
-    m_Value: 821.31006
+    m_Value: 18.307709
   m_Ortho:
     m_Target: 0
     speed: 2

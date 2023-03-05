@@ -73,6 +73,7 @@ namespace StateOfClone.GameMap
             cellShaderData = gameObject.AddComponent<HexCellShaderData>();
             cellShaderData.Grid = this;
             CreateMap(CellCountX, CellCountZ, false);
+            ClearPath();
         }
 
         /// <summary>
