@@ -7,9 +7,9 @@ namespace StateOfClone.Units
 {
     public class UnitMove : MonoBehaviour, IHexUnit
     {
-        public IHexGrid Grid { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-        public IHexCell Location { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-        public float Orientation { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+        public IHexGrid Grid { get; set; }
+        public IHexCell Location { get; set; }
+        public float Orientation { get; set; }
 
         public int Speed => _data.Speed;
 
@@ -55,6 +55,10 @@ namespace StateOfClone.Units
             _turret = transform.GetChild(1);
         }
 
-
+        public void AimTurret(Vector3 point)
+        {
+            point.y = _turret.position.y;
+            _turret.LookAt(point);
+        }
     }
 }
