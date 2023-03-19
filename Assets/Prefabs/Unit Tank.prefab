@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6254095307184573822}
   - component: {fileID: 2970120804871115984}
   - component: {fileID: 3784860193674603224}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Angle Front
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -109,7 +109,7 @@ GameObject:
   - component: {fileID: 8902625073677479917}
   - component: {fileID: 7915127771051163858}
   - component: {fileID: 1230333053700155372}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -206,7 +206,7 @@ GameObject:
   - component: {fileID: 7338301351004781824}
   - component: {fileID: 3523087041149668081}
   - component: {fileID: 2456627429053270110}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Base Bottom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -303,7 +303,7 @@ GameObject:
   - component: {fileID: 5281011165042930824}
   - component: {fileID: 8405987014278774005}
   - component: {fileID: 1347527669657285292}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Turret Front
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -401,7 +401,7 @@ GameObject:
   - component: {fileID: 8047519433148616792}
   - component: {fileID: 6037217678486746715}
   - component: {fileID: 7970813265340136308}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Angle Rear
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -495,7 +495,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7521961016091407582}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Turret
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -533,7 +533,7 @@ GameObject:
   - component: {fileID: 7701404674625748224}
   - component: {fileID: 4927773630487717688}
   - component: {fileID: 5141155593214216595}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Turret Rear
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -631,7 +631,7 @@ GameObject:
   - component: {fileID: 7940998112098804686}
   - component: {fileID: 3151343540985229637}
   - component: {fileID: 5468012044859793754}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Gun Barrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -729,7 +729,7 @@ GameObject:
   - component: {fileID: 8459581014246902481}
   - component: {fileID: 311189410891927551}
   - component: {fileID: 1221508737630142132}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Base Top
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -823,8 +823,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8294839817007354588}
+  - component: {fileID: 9056106201279526766}
   - component: {fileID: 3981381912372622207}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Unit Tank
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -848,6 +849,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9056106201279526766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7976790011760261007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a659c0d6067ffe419746db7112e061b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _data: {fileID: 11400000, guid: f6acb09a9899af54884e1dfb0ca7d661, type: 2}
 --- !u!114 &3981381912372622207
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -870,7 +884,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7940057674649730727}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
