@@ -27,14 +27,21 @@ namespace StateOfClone.Units
         {
             DeselectAll();
             SelectedUnits.Add(unitToAdd);
+            unitToAdd.transform.GetChild(0).gameObject.SetActive(true);
         }
 
         public void ShiftClickSelect(GameObject unitToAdd)
         {
             if (!SelectedUnits.Contains(unitToAdd))
+            {
                 SelectedUnits.Add(unitToAdd);
+                unitToAdd.transform.GetChild(0).gameObject.SetActive(true);
+            }
             else
+            {
+                unitToAdd.transform.GetChild(0).gameObject.SetActive(false);
                 SelectedUnits.Remove(unitToAdd);
+            }
         }
 
         public void DragSelect(GameObject unitToAdd)
@@ -44,6 +51,9 @@ namespace StateOfClone.Units
 
         public void DeselectAll()
         {
+            foreach (GameObject unit in SelectedUnits)
+                unit.transform.GetChild(0).gameObject.SetActive(false);
+
             SelectedUnits.Clear();
         }
 
