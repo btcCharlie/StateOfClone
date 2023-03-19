@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using StateOfClone.Core;
 
 namespace StateOfClone.Units
 {
@@ -8,17 +7,21 @@ namespace StateOfClone.Units
     {
         [SerializeField] private LayerMask _clickableLayer, _groundLayer;
 
-        [SerializeField] private PlayerInput playerInput;
-
         private Camera _camera;
 
-        private InputAction _unitSelectAction, _unitShiftSelectAction, _unitDragSelectAction;
+        private PlayerInput _playerInput;
+        private InputAction _unitSelectAction, _unitShiftSelectAction;
 
         void Awake()
         {
             _camera = Camera.main;
-            _unitSelectAction = playerInput.actions["SelectUnit"];
-            _unitShiftSelectAction = playerInput.actions["AddToSelection"];
+            _playerInput = MyInputManager.Instance.PlayerInput;
+            _unitSelectAction = _playerInput.actions["SelectUnit"];
+            _unitShiftSelectAction = _playerInput.actions["AddToSelection"];
+        }
+
+        private void Start()
+        {
         }
 
         private void OnEnable()
@@ -28,6 +31,7 @@ namespace StateOfClone.Units
 
             _unitSelectAction.performed += OnUnitSelect;
             _unitShiftSelectAction.performed += OnUnitShiftSelect;
+
         }
 
         private void OnDisable()
@@ -37,6 +41,8 @@ namespace StateOfClone.Units
 
             _unitSelectAction.performed -= OnUnitSelect;
             _unitShiftSelectAction.performed -= OnUnitShiftSelect;
+
+            SelectionManager.Instance.UnregisterUnit(this.gameObject);
         }
 
         private void OnUnitSelect(InputAction.CallbackContext context)
@@ -47,7 +53,9 @@ namespace StateOfClone.Units
             Ray ray = _camera.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _clickableLayer))
             {
-                SelectionManager.Instance.ClickSelect(GetClickableObject(hit));
+                SelectionManager.Instance.ClickSelect(
+                    SelectionManager.GetClickableObject(hit)
+                    );
             }
             else
             {
@@ -60,21 +68,10 @@ namespace StateOfClone.Units
             Ray ray = _camera.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _clickableLayer))
             {
-                SelectionManager.Instance.ShiftClickSelect(GetClickableObject(hit));
+                SelectionManager.Instance.ShiftClickSelect(
+                    SelectionManager.GetClickableObject(hit)
+                    );
             }
-        }
-
-        private static GameObject GetClickableObject(RaycastHit hit)
-        {
-            GameObject clickableObject = hit.collider.gameObject;
-            while (!clickableObject.TryGetComponent<IClickable>(out _))
-            {
-                // there has to be a clickable object because we're in
-                // a clickable layer - if not, an error is due anyway
-                clickableObject = clickableObject.transform.parent.gameObject;
-            }
-
-            return clickableObject;
         }
     }
 }

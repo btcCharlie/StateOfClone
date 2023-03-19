@@ -58,6 +58,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "DragSelect",
+                    "type": "Button",
+                    "id": "8a770aa2-3dea-416a-99c2-fd1c13ed4e0d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MoveUnit",
+                    "type": "Button",
+                    "id": "7a53f2dd-16b6-465f-820b-51bcaac3cc4e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -260,39 +278,6 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "One Modifier",
-                    "id": "15b116b0-09da-4e0c-9be5-bb3556db7b8f",
-                    "path": "OneModifier",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "SelectUnit",
-                    "isComposite": true,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "modifier",
-                    "id": "c151a321-ce59-4a90-9878-5b71d59ae3af",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard",
-                    "action": "SelectUnit",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "binding",
-                    "id": "94fc7643-2bf9-47cb-a4ca-52beaeed6367",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard",
-                    "action": "SelectUnit",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
                     "name": "Mouse Left Click + Shift",
                     "id": "5b089a08-a055-45d0-b8a3-a31f117d3261",
                     "path": "OneModifier",
@@ -324,6 +309,28 @@
                     "action": "AddToSelection",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "827c5d9d-3fb4-42fb-a406-1a3795617c31",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "DragSelect",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3075cba2-c182-4b39-9b2a-5557792bf213",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "MoveUnit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

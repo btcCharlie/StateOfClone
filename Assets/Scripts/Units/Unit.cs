@@ -57,12 +57,12 @@ namespace StateOfClone.Units
 
         private void Start()
         {
-            SelectionManager.Instance.Units.Add(this.gameObject);
+            SelectionManager.Instance.RegisterUnit(this.gameObject);
         }
 
         private void OnDestroy()
         {
-            SelectionManager.Instance.Units.Remove(this.gameObject);
+            SelectionManager.Instance.UnregisterUnit(this.gameObject);
         }
 
         public void AimTurret(Vector3 point)

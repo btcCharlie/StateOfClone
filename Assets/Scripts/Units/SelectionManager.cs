@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 using StateOfClone.Core;
 
@@ -9,57 +10,91 @@ namespace StateOfClone.Units
         public static SelectionManager Instance { get; private set; }
         public IHexGrid Grid { get; set; }
 
-        public List<GameObject> Units { get; set; }
-        public List<GameObject> SelectedUnits { get; set; }
+        private List<GameObject> units, selectedUnits;
+
+        public ReadOnlyCollection<GameObject> Units
+        {
+            get { return units.AsReadOnly(); }
+        }
 
         void Awake()
         {
             if (Instance != null && Instance != this)
+            {
                 Destroy(this.gameObject);
-            else
-                Instance = this;
+                return;
+            }
 
-            Units = new List<GameObject>();
-            SelectedUnits = new List<GameObject>();
+            Instance = this;
+
+            units = new List<GameObject>();
+            selectedUnits = new List<GameObject>();
+        }
+
+        public void RegisterUnit(GameObject unit)
+        {
+            units.Add(unit);
+        }
+
+        public void UnregisterUnit(GameObject unit)
+        {
+            units.Remove(unit);
         }
 
         public void ClickSelect(GameObject unitToAdd)
         {
             DeselectAll();
-            SelectedUnits.Add(unitToAdd);
+            selectedUnits.Add(unitToAdd);
             unitToAdd.transform.GetChild(0).gameObject.SetActive(true);
         }
 
         public void ShiftClickSelect(GameObject unitToAdd)
         {
-            if (!SelectedUnits.Contains(unitToAdd))
+            if (!selectedUnits.Contains(unitToAdd))
             {
-                SelectedUnits.Add(unitToAdd);
+                selectedUnits.Add(unitToAdd);
                 unitToAdd.transform.GetChild(0).gameObject.SetActive(true);
             }
             else
             {
                 unitToAdd.transform.GetChild(0).gameObject.SetActive(false);
-                SelectedUnits.Remove(unitToAdd);
+                selectedUnits.Remove(unitToAdd);
             }
         }
 
         public void DragSelect(GameObject unitToAdd)
         {
+            if (selectedUnits.Contains(unitToAdd))
+                return;
 
+            selectedUnits.Add(unitToAdd);
+            unitToAdd.transform.GetChild(0).gameObject.SetActive(true);
         }
 
         public void DeselectAll()
         {
-            foreach (GameObject unit in SelectedUnits)
+            foreach (GameObject unit in selectedUnits)
                 unit.transform.GetChild(0).gameObject.SetActive(false);
 
-            SelectedUnits.Clear();
+            selectedUnits.Clear();
         }
 
         public void Deselect(GameObject unitToDeselect)
         {
 
+        }
+
+        public static GameObject GetClickableObject(RaycastHit hit)
+        {
+            GameObject clickableObject = hit.collider.gameObject;
+            while (!clickableObject.TryGetComponent<IClickable>(out _))
+            {
+                // there has to be a clickable object because we're in
+                // a clickable layer - if not, an error is due anyway
+                clickableObject = clickableObject.transform.parent.gameObject;
+            }
+
+            return clickableObject;
         }
     }
 }
