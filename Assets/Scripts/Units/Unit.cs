@@ -6,7 +6,7 @@ using StateOfClone.Core;
 
 namespace StateOfClone.Units
 {
-    public class Unit : MonoBehaviour, IHexUnit, IClickable
+    public class Unit : MonoBehaviour, IHexUnit, ISelectable
     {
         public IHexGrid Grid { get; set; }
         public IHexCell Location { get; set; }
@@ -32,7 +32,7 @@ namespace StateOfClone.Units
 
         private void Start()
         {
-            SelectionManager.Instance.RegisterUnit(this.gameObject);
+            SelectionManager.Instance.RegisterUnit(this);
 
             if (OnSelected == null)
                 OnSelected = new UnityEvent();
@@ -42,7 +42,7 @@ namespace StateOfClone.Units
 
         private void OnDestroy()
         {
-            SelectionManager.Instance.UnregisterUnit(this.gameObject);
+            SelectionManager.Instance.UnregisterUnit(this);
         }
 
         public void Die()

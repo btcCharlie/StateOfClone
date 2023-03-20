@@ -10,9 +10,9 @@ namespace StateOfClone.Units
         public static SelectionManager Instance { get; private set; }
         public IHexGrid Grid { get; set; }
 
-        private List<GameObject> units, selectedUnits;
+        private List<ISelectable> units, selectedUnits;
 
-        public ReadOnlyCollection<GameObject> Units
+        public ReadOnlyCollection<ISelectable> Units
         {
             get { return units.AsReadOnly(); }
         }
@@ -27,65 +27,65 @@ namespace StateOfClone.Units
 
             Instance = this;
 
-            units = new List<GameObject>();
-            selectedUnits = new List<GameObject>();
+            units = new List<ISelectable>();
+            selectedUnits = new List<ISelectable>();
         }
 
-        public void RegisterUnit(GameObject unit)
+        public void RegisterUnit(ISelectable unit)
         {
             units.Add(unit);
         }
 
-        public void UnregisterUnit(GameObject unit)
+        public void UnregisterUnit(ISelectable unit)
         {
             units.Remove(unit);
         }
 
-        public void ClickSelect(IClickable unitToAdd)
+        public void ClickSelect(ISelectable unitToAdd)
         {
             DeselectAll();
             selectedUnits.Add(unitToAdd);
-            unitToAdd.transform.GetChild(0).gameObject.SetActive(true);
+            unitToAdd.gameObject.transform.GetChild(0).gameObject.SetActive(true);
             unitToAdd.OnSelected.Invoke();
-            unitToAdd.GetComponent<UnitMove>().enabled = true;
+            unitToAdd.gameObject.GetComponent<UnitMove>().enabled = true;
         }
 
-        public void ShiftClickSelect(GameObject unitToAdd)
+        public void ShiftClickSelect(ISelectable unitToAdd)
         {
             if (!selectedUnits.Contains(unitToAdd))
             {
                 selectedUnits.Add(unitToAdd);
-                unitToAdd.transform.GetChild(0).gameObject.SetActive(true);
+                unitToAdd.gameObject.transform.GetChild(0).gameObject.SetActive(true);
                 unitToAdd.OnSelected.Invoke();
-                unitToAdd.GetComponent<UnitMove>().enabled = true;
+                unitToAdd.gameObject.GetComponent<UnitMove>().enabled = true;
             }
             else
             {
                 unitToAdd.OnDeselected.Invoke();
-                unitToAdd.GetComponent<UnitMove>().enabled = false;
-                unitToAdd.transform.GetChild(0).gameObject.SetActive(false);
+                unitToAdd.gameObject.GetComponent<UnitMove>().enabled = false;
+                unitToAdd.gameObject.transform.GetChild(0).gameObject.SetActive(false);
                 selectedUnits.Remove(unitToAdd);
             }
         }
 
-        public void DragSelect(GameObject unitToAdd)
+        public void DragSelect(ISelectable unitToAdd)
         {
             if (selectedUnits.Contains(unitToAdd))
                 return;
 
             selectedUnits.Add(unitToAdd);
-            unitToAdd.transform.GetChild(0).gameObject.SetActive(true);
+            unitToAdd.gameObject.transform.GetChild(0).gameObject.SetActive(true);
             unitToAdd.OnSelected.Invoke();
-            unitToAdd.GetComponent<UnitMove>().enabled = true;
+            unitToAdd.gameObject.GetComponent<UnitMove>().enabled = true;
         }
 
         public void DeselectAll()
         {
-            foreach (GameObject unit in selectedUnits)
+            foreach (ISelectable unit in selectedUnits)
             {
-                unit.transform.GetChild(0).gameObject.SetActive(false);
-                unitToAdd.OnDeselected.Invoke();
-                unit.GetComponent<UnitMove>().enabled = false;
+                unit.gameObject.transform.GetChild(0).gameObject.SetActive(false);
+                unit.OnDeselected.Invoke();
+                unit.gameObject.GetComponent<UnitMove>().enabled = false;
             }
 
             selectedUnits.Clear();
@@ -96,17 +96,18 @@ namespace StateOfClone.Units
 
         }
 
-        public static GameObject GetClickableObject(RaycastHit hit)
+        public static ISelectable GetClickableObject(RaycastHit hit)
         {
             GameObject clickableObject = hit.collider.gameObject;
-            while (!clickableObject.TryGetComponent<IClickable>(out _))
+            ISelectable selectable;
+            while (!clickableObject.TryGetComponent(out selectable))
             {
                 // there has to be a clickable object because we're in
                 // a clickable layer - if not, an error is due anyway
                 clickableObject = clickableObject.transform.parent.gameObject;
             }
 
-            return clickableObject;
+            return selectable;
         }
     }
 }

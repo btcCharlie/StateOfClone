@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using StateOfClone.Core;
 
 namespace StateOfClone.Units
 {
@@ -143,9 +144,9 @@ namespace StateOfClone.Units
 
         private void SelectUnits()
         {
-            foreach (GameObject unit in SelectionManager.Instance.Units)
+            foreach (ISelectable unit in SelectionManager.Instance.Units)
             {
-                Vector2 screenPosition = _camera.WorldToScreenPoint(unit.transform.position);
+                Vector2 screenPosition = _camera.WorldToScreenPoint(unit.gameObject.transform.position);
                 if (_selectionBox.Contains(screenPosition))
                 {
                     SelectionManager.Instance.DragSelect(unit);

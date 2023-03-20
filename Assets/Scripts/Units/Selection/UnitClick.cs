@@ -20,10 +20,6 @@ namespace StateOfClone.Units
             _unitShiftSelectAction = _playerInput.actions["AddToSelection"];
         }
 
-        private void Start()
-        {
-        }
-
         private void OnEnable()
         {
             _unitSelectAction.Enable();
@@ -31,7 +27,6 @@ namespace StateOfClone.Units
 
             _unitSelectAction.performed += OnUnitSelect;
             _unitShiftSelectAction.performed += OnUnitShiftSelect;
-
         }
 
         private void OnDisable()
@@ -41,8 +36,6 @@ namespace StateOfClone.Units
 
             _unitSelectAction.performed -= OnUnitSelect;
             _unitShiftSelectAction.performed -= OnUnitShiftSelect;
-
-            SelectionManager.Instance.UnregisterUnit(this.gameObject);
         }
 
         private void OnUnitSelect(InputAction.CallbackContext context)

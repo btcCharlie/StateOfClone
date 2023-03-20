@@ -6,6 +6,6 @@ namespace StateOfClone.Units
     /// </summary>
     public interface IUnitAction
     {
-
+        
     }
 }
