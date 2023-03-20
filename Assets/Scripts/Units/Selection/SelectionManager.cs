@@ -41,11 +41,13 @@ namespace StateOfClone.Units
             units.Remove(unit);
         }
 
-        public void ClickSelect(GameObject unitToAdd)
+        public void ClickSelect(IClickable unitToAdd)
         {
             DeselectAll();
             selectedUnits.Add(unitToAdd);
             unitToAdd.transform.GetChild(0).gameObject.SetActive(true);
+            unitToAdd.OnSelected.Invoke();
+            unitToAdd.GetComponent<UnitMove>().enabled = true;
         }
 
         public void ShiftClickSelect(GameObject unitToAdd)
@@ -54,9 +56,13 @@ namespace StateOfClone.Units
             {
                 selectedUnits.Add(unitToAdd);
                 unitToAdd.transform.GetChild(0).gameObject.SetActive(true);
+                unitToAdd.OnSelected.Invoke();
+                unitToAdd.GetComponent<UnitMove>().enabled = true;
             }
             else
             {
+                unitToAdd.OnDeselected.Invoke();
+                unitToAdd.GetComponent<UnitMove>().enabled = false;
                 unitToAdd.transform.GetChild(0).gameObject.SetActive(false);
                 selectedUnits.Remove(unitToAdd);
             }
@@ -69,12 +75,18 @@ namespace StateOfClone.Units
 
             selectedUnits.Add(unitToAdd);
             unitToAdd.transform.GetChild(0).gameObject.SetActive(true);
+            unitToAdd.OnSelected.Invoke();
+            unitToAdd.GetComponent<UnitMove>().enabled = true;
         }
 
         public void DeselectAll()
         {
             foreach (GameObject unit in selectedUnits)
+            {
                 unit.transform.GetChild(0).gameObject.SetActive(false);
+                unitToAdd.OnDeselected.Invoke();
+                unit.GetComponent<UnitMove>().enabled = false;
+            }
 
             selectedUnits.Clear();
         }

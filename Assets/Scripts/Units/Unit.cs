@@ -1,7 +1,8 @@
 using UnityEngine;
-using StateOfClone.Core;
+using UnityEngine.Events;
 using System.IO;
 using System.Collections.Generic;
+using StateOfClone.Core;
 
 namespace StateOfClone.Units
 {
@@ -18,6 +19,31 @@ namespace StateOfClone.Units
         [SerializeField] private UnitData _data;
 
         private Transform _body, _turret;
+
+        public UnityEvent OnSelected { get; set; }
+        public UnityEvent OnDeselected { get; set; }
+
+        private void Awake()
+        {
+            _body = transform.GetChild(0);
+            _turret = transform.GetChild(1);
+
+        }
+
+        private void Start()
+        {
+            SelectionManager.Instance.RegisterUnit(this.gameObject);
+
+            if (OnSelected == null)
+                OnSelected = new UnityEvent();
+            if (OnDeselected == null)
+                OnDeselected = new UnityEvent();
+        }
+
+        private void OnDestroy()
+        {
+            SelectionManager.Instance.UnregisterUnit(this.gameObject);
+        }
 
         public void Die()
         {
@@ -47,22 +73,6 @@ namespace StateOfClone.Units
         public void ValidateLocation()
         {
             throw new System.NotImplementedException();
-        }
-
-        private void Awake()
-        {
-            _body = transform.GetChild(0);
-            _turret = transform.GetChild(1);
-        }
-
-        private void Start()
-        {
-            SelectionManager.Instance.RegisterUnit(this.gameObject);
-        }
-
-        private void OnDestroy()
-        {
-            SelectionManager.Instance.UnregisterUnit(this.gameObject);
         }
 
         public void AimTurret(Vector3 point)

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6345169637596688919}
   - component: {fileID: 6037144087800632302}
   - component: {fileID: 7460097748148640333}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: HexGridCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 255291207066494477}
   - component: {fileID: 9144097715319131692}
   - component: {fileID: 7313978800307499140}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Water Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -192,7 +192,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4584058564861874165}
   - component: {fileID: 360559069896586970}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hex Grid Chunk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -251,7 +251,7 @@ GameObject:
   - component: {fileID: 171357900482686454}
   - component: {fileID: 5717296268345795687}
   - component: {fileID: 1929465511855361434}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Rivers Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -351,7 +351,7 @@ GameObject:
   - component: {fileID: 407347723773310490}
   - component: {fileID: 6047710069364924957}
   - component: {fileID: 2959836734702350922}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Estuaries Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -451,7 +451,7 @@ GameObject:
   - component: {fileID: 1204006680593812572}
   - component: {fileID: 859919518141224177}
   - component: {fileID: 6762222365247964578}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Water Shore Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -551,7 +551,7 @@ GameObject:
   - component: {fileID: 2058034566040341000}
   - component: {fileID: 777361852454111497}
   - component: {fileID: 1532367317140052062}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Roads Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -651,7 +651,7 @@ GameObject:
   - component: {fileID: 3021109005350917721}
   - component: {fileID: 5737723961400474026}
   - component: {fileID: 5385586533015645050}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Terrain Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
