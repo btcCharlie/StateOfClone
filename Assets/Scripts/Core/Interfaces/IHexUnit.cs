@@ -1,21 +1,21 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace StateOfClone.GameMap
+namespace StateOfClone.Core
 {
     public interface IHexUnit
     {
-        HexGrid Grid { get; set; }
-        HexCell Location { get; set; }
+        IHexGrid Grid { get; set; }
+        IHexCell Location { get; set; }
         float Orientation { get; set; }
         int Speed { get; }
         int VisionRange { get; }
 
         void Die();
-        int GetMoveCost(HexCell fromCell, HexCell toCell, HexDirection direction);
-        bool IsValidDestination(HexCell cell);
+        int GetMoveCost(IHexCell fromCell, IHexCell toCell, HexDirection direction);
+        bool IsValidDestination(IHexCell cell);
         void Save(BinaryWriter writer);
-        void Travel(List<HexCell> path);
+        void Travel(List<IHexCell> path);
         void ValidateLocation();
     }
 }

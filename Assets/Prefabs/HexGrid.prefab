@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1645111023192737856
+--- !u!1 &1320472911647510810
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,22 +8,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 3210341319650228944}
-  - component: {fileID: 9167677554356034566}
-  m_Layer: 0
-  m_Name: HexCell
+  - component: {fileID: 1320472911647510812}
+  - component: {fileID: 1320472911647510813}
+  m_Layer: 7
+  m_Name: HexGrid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &3210341319650228944
+--- !u!4 &1320472911647510812
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1645111023192737856}
+  m_GameObject: {fileID: 1320472911647510810}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -32,22 +32,25 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &9167677554356034566
+--- !u!114 &1320472911647510813
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1645111023192737856}
+  m_GameObject: {fileID: 1320472911647510810}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8793aa8c10326824fa53eb9ac1e3b64e, type: 3}
+  m_Script: {fileID: 11500000, guid: 6d00410778c7f74439dc8b868430a493, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  neighbors:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  <CellCountX>k__BackingField: 60
+  <CellCountZ>k__BackingField: 45
+  cellPrefab: {fileID: 9167677554356034566, guid: f0c5ce70a99775a40bff019f4dc3ab62,
+    type: 3}
+  cellLabelPrefab: {fileID: 176849114814397810, guid: 65a8967d8cdaf724ca44634b7e2b2e07,
+    type: 3}
+  chunkPrefab: {fileID: 360559069896586970, guid: 1a14c031f2c53ef4785d5f96b858cc6f,
+    type: 3}
+  noiseSource: {fileID: 2800000, guid: fa338a1620e8bfc4f81af92e8e2397e5, type: 3}
+  seed: 0

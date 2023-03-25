@@ -1,7 +1,6 @@
 using UnityEngine;
-using StateOfClone.Core;
 
-namespace StateOfClone.GameMap
+namespace StateOfClone.Core
 {
     /// <summary>
     /// Constant metrics and utility methods for the hex map.
@@ -281,21 +280,21 @@ namespace StateOfClone.GameMap
             (corners[(int)direction] + corners[(int)direction + 1]) * waterBlendFactor;
         #endregion
 
-        /// <summary>
-        /// Determine the <see cref="HexEdgeType"/> based on two elevations.
-        /// </summary>
-        /// <param name="elevation1">First elevation.</param>
-        /// <param name="elevation2">Second elevation.</param>
-        /// <returns>Matching <see cref="HexEdgeType"/>.</returns>
-        public static HexEdgeType GetEdgeType(int elevation1, int elevation2)
-        {
-            if (elevation1 == elevation2)
-                return HexEdgeType.Flat;
-            int delta = elevation2 - elevation1;
-            if (delta == 1 || delta == -1)
-                return HexEdgeType.Slope;
-            return HexEdgeType.Cliff;
-        }
+        // /// <summary>
+        // /// Determine the <see cref="HexEdgeType"/> based on two elevations.
+        // /// </summary>
+        // /// <param name="elevation1">First elevation.</param>
+        // /// <param name="elevation2">Second elevation.</param>
+        // /// <returns>Matching <see cref="HexEdgeType"/>.</returns>
+        // public static HexEdgeType GetEdgeType(int elevation1, int elevation2)
+        // {
+        //     if (elevation1 == elevation2)
+        //         return HexEdgeType.Flat;
+        //     int delta = elevation2 - elevation1;
+        //     if (delta == 1 || delta == -1)
+        //         return HexEdgeType.Slope;
+        //     return HexEdgeType.Cliff;
+        // }
     }
 }
 

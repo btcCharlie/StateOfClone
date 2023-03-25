@@ -1,4 +1,4 @@
-namespace StateOfClone.GameMap
+namespace StateOfClone.Core
 {
     /// <summary>
     /// Hexagonal direction, pointy side up, which is north.

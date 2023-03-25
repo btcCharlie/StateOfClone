@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using StateOfClone.GameMap;
+using StateOfClone.Core;
 
 /// <summary>
 /// Drawer for <see cref="HexCoordinates"/> values in the inspector.

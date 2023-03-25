@@ -1,24 +1,25 @@
 using UnityEngine;
+using StateOfClone.Core;
 
 namespace StateOfClone.GameMap
 {
     /// <summary>
     /// Component that manages a single chunk of <see cref="HexGrid"/>.
     /// </summary>
-    public class HexGridChunk : MonoBehaviour
+    public class HexGridChunk : MonoBehaviour, IHexGridChunk
     {
         [SerializeField]
         private HexMesh terrain, rivers, roads, water, waterShore, estuaries;
 
         private HexTriangulator _triangulator;
 
-        private HexCell[] cells;
+        private IHexCell[] cells;
 
         private Canvas gridCanvas;
 
         void Awake()
         {
-            cells = new HexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
+            cells = new IHexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
             gridCanvas = GetComponentInChildren<Canvas>();
 
             _triangulator = new HexTriangulator(
@@ -31,7 +32,7 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="index">Index of the cell for the chunk.</param>
         /// <param name="cell">Cell to add.</param>
-        public void AddCell(int index, HexCell cell)
+        public void AddCell(int index, IHexCell cell)
         {
             cells[index] = cell;
             cell.Chunk = this;
