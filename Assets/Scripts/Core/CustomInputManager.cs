@@ -4,9 +4,9 @@ using UnityEngine.InputSystem;
 namespace StateOfClone.Units
 {
     [RequireComponent(typeof(PlayerInput))]
-    public class MyInputManager : MonoBehaviour
+    public class CustomInputManager : MonoBehaviour
     {
-        public static MyInputManager Instance { get; private set; }
+        public static CustomInputManager Instance { get; private set; }
 
         [field: SerializeField] public PlayerInput PlayerInput { get; private set; }
 
