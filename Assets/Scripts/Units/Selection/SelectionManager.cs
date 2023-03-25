@@ -57,12 +57,12 @@ namespace StateOfClone.Units
                 selectedUnits.Add(unitToAdd);
                 unitToAdd.gameObject.transform.GetChild(0).gameObject.SetActive(true);
                 unitToAdd.OnSelected.Invoke();
-                unitToAdd.gameObject.GetComponent<UnitMove>().enabled = true;
+                // unitToAdd.gameObject.GetComponent<UnitMove>().enabled = true;
             }
             else
             {
                 unitToAdd.OnDeselected.Invoke();
-                unitToAdd.gameObject.GetComponent<UnitMove>().enabled = false;
+                // unitToAdd.gameObject.GetComponent<UnitMove>().enabled = false;
                 unitToAdd.gameObject.transform.GetChild(0).gameObject.SetActive(false);
                 selectedUnits.Remove(unitToAdd);
             }
@@ -76,7 +76,7 @@ namespace StateOfClone.Units
             selectedUnits.Add(unitToAdd);
             unitToAdd.gameObject.transform.GetChild(0).gameObject.SetActive(true);
             unitToAdd.OnSelected.Invoke();
-            unitToAdd.gameObject.GetComponent<UnitMove>().enabled = true;
+            // unitToAdd.gameObject.GetComponent<UnitMove>().enabled = true;
         }
 
         public void DeselectAll()
@@ -85,7 +85,7 @@ namespace StateOfClone.Units
             {
                 unit.gameObject.transform.GetChild(0).gameObject.SetActive(false);
                 unit.OnDeselected.Invoke();
-                unit.gameObject.GetComponent<UnitMove>().enabled = false;
+                // unit.gameObject.GetComponent<UnitMove>().enabled = false;
             }
 
             selectedUnits.Clear();

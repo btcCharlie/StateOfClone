@@ -23,7 +23,7 @@ namespace StateOfClone.Units
             _camera = Camera.main;
             _unit = GetComponent<Unit>();
 
-            _playerInput = MyInputManager.Instance.PlayerInput;
+            _playerInput = CustomInputManager.Instance.PlayerInput;
             _unitMoveAction = _playerInput.actions["MoveUnit"];
         }
 
@@ -55,7 +55,6 @@ namespace StateOfClone.Units
 
         private void OnUnitMove(InputAction.CallbackContext context)
         {
-            Debug.Log("UnitMove.OnUnitMove");
             Ray ray = _camera.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _groundLayer))
             {
@@ -70,6 +69,8 @@ namespace StateOfClone.Units
             point.y = transform.position.y;
             yield return LookAt_Coroutine(point);
 
+            yield return new WaitForSeconds(0.1f);
+
             while (Vector3.Distance(transform.position, point) > 0.1f)
             {
                 Vector3 direction = (point - transform.position).normalized;
@@ -81,32 +82,26 @@ namespace StateOfClone.Units
 
         private IEnumerator LookAt_Coroutine(Vector3 point)
         {
-            float turnSpeed = 50f;
+            float turnSpeedDegPerSec = 50f;
 
-            Quaternion fromRotation = transform.localRotation;
+            Quaternion fromRotation = transform.rotation;
             Quaternion toRotation =
-                Quaternion.LookRotation(point - transform.localPosition);
-            float angle = Quaternion.Angle(fromRotation, toRotation);
+                Quaternion.LookRotation(point - transform.position, transform.up);
+            float angleToRotate = Quaternion.Angle(fromRotation, toRotation);
 
-            if (angle > 0f)
+            if (angleToRotate > 0f)
             {
-                float speed = turnSpeed / angle;
+                float speed = turnSpeedDegPerSec / angleToRotate;
+
                 for (
                     float t = Time.deltaTime * speed;
                     t < 1f;
                     t += Time.deltaTime * speed
                 )
                 {
-                    transform.localRotation = Quaternion.Slerp(fromRotation, toRotation, t);
+                    transform.rotation = Quaternion.Slerp(fromRotation, toRotation, t);
                     yield return null;
                 }
-                // while (transform.localRotation != toRotation)
-                // {
-                //     t += Time.deltaTime * speed;
-                //     transform.localRotation =
-                //         Quaternion.Slerp(fromRotation, toRotation, Time.deltaTime * speed);
-                //     yield return wait;
-                // }
             }
         }
     }

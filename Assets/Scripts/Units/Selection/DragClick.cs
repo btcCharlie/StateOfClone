@@ -22,7 +22,7 @@ namespace StateOfClone.Units
         void Awake()
         {
             _camera = Camera.main;
-            _playerInput = MyInputManager.Instance.PlayerInput;
+            _playerInput = CustomInputManager.Instance.PlayerInput;
             _unitDragSelectAction = _playerInput.actions["SelectUnit"];
             _unitDragShiftSelectAction = _playerInput.actions["AddToSelection"];
         }
