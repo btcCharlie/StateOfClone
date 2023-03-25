@@ -16,29 +16,35 @@ namespace StateOfClone.Units
 
         private Unit _unit;
 
-        private Coroutine _moveCoroutine;
-
         private void Awake()
         {
-            _camera = Camera.main;
-            _unit = GetComponent<Unit>();
-
             _playerInput = CustomInputManager.Instance.PlayerInput;
             _unitMoveAction = _playerInput.actions["MoveUnit"];
         }
 
-        private void OnEnable()
+        private void Start()
         {
-            _unitMoveAction.Enable();
-            _unitMoveAction.performed += OnUnitMove;
+            _camera = Camera.main;
+            _unit = GetComponent<Unit>();
+
             _unit.OnSelected.AddListener(OnSelected);
             _unit.OnDeselected.AddListener(OnDeselected);
+
+            enabled = false;
+        }
+
+        private void OnEnable()
+        {
+            _unitMoveAction.performed += OnUnitMove;
         }
 
         private void OnDisable()
         {
-            _unitMoveAction.Disable();
             _unitMoveAction.performed -= OnUnitMove;
+        }
+
+        private void OnDestroy()
+        {
             _unit.OnSelected.RemoveListener(OnSelected);
             _unit.OnDeselected.RemoveListener(OnDeselected);
         }
@@ -59,7 +65,7 @@ namespace StateOfClone.Units
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _groundLayer))
             {
                 StopAllCoroutines();
-                _moveCoroutine = StartCoroutine(MoveTo_Coroutine(hit.point));
+                StartCoroutine(MoveTo_Coroutine(hit.point));
             }
         }
 

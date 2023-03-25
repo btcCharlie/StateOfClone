@@ -19,20 +19,20 @@ namespace StateOfClone.Units
 
         private bool _isDragging = false;
 
-        void Awake()
+        private void Awake()
         {
-            _camera = Camera.main;
             _playerInput = CustomInputManager.Instance.PlayerInput;
             _unitDragSelectAction = _playerInput.actions["SelectUnit"];
             _unitDragShiftSelectAction = _playerInput.actions["AddToSelection"];
         }
 
-        private void Start()
+        void Start()
         {
+            _camera = Camera.main;
+
             _startPosition = Vector2.zero;
             _endPosition = Vector2.zero;
             DrawVisual();
-
         }
 
         private void Update()

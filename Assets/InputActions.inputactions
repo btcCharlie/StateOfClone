@@ -78,9 +78,27 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "SpawUnit",
+                    "name": "SpawnUnit",
                     "type": "Button",
                     "id": "93d31448-5346-475a-a82c-9336545be927",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CtrlEnable",
+                    "type": "Button",
+                    "id": "6e620c1d-4939-42d4-969c-55c57e04a3de",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ShiftEnable",
+                    "type": "Button",
+                    "id": "325caa9d-4a1f-40ed-b837-e24413431548",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -348,7 +366,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "SpawUnit",
+                    "action": "SpawnUnit",
                     "isComposite": true,
                     "isPartOfComposite": false
                 },
@@ -359,20 +377,42 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
-                    "action": "SpawUnit",
+                    "action": "SpawnUnit",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
                 {
                     "name": "binding",
                     "id": "d839cedd-d055-4c94-872d-365c7d20dabf",
-                    "path": "<Keyboard>/q",
+                    "path": "<Keyboard>/x",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
-                    "action": "SpawUnit",
+                    "action": "SpawnUnit",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "ca51a5ce-5008-4ac8-afd5-a57c2f62efbc",
+                    "path": "<Keyboard>/leftCtrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "CtrlEnable",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9d1483f5-fc52-415c-bd49-f6ba41572ff8",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "ShiftEnable",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
