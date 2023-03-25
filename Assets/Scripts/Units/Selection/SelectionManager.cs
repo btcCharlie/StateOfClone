@@ -10,11 +10,11 @@ namespace StateOfClone.Units
         public static SelectionManager Instance { get; private set; }
         public IHexGrid Grid { get; set; }
 
-        private List<ISelectable> units, selectedUnits;
+        private List<ISelectable> _units, _selectedUnits;
 
         public ReadOnlyCollection<ISelectable> Units
         {
-            get { return units.AsReadOnly(); }
+            get { return _units.AsReadOnly(); }
         }
 
         void Awake()
@@ -27,24 +27,24 @@ namespace StateOfClone.Units
 
             Instance = this;
 
-            units = new List<ISelectable>();
-            selectedUnits = new List<ISelectable>();
+            _units = new List<ISelectable>();
+            _selectedUnits = new List<ISelectable>();
         }
 
         public void RegisterUnit(ISelectable unit)
         {
-            units.Add(unit);
+            _units.Add(unit);
         }
 
         public void UnregisterUnit(ISelectable unit)
         {
-            units.Remove(unit);
+            _units.Remove(unit);
         }
 
         public void ClickSelect(ISelectable unitToAdd)
         {
             DeselectAll();
-            selectedUnits.Add(unitToAdd);
+            _selectedUnits.Add(unitToAdd);
             unitToAdd.gameObject.transform.GetChild(0).gameObject.SetActive(true);
             unitToAdd.OnSelected.Invoke();
             unitToAdd.gameObject.GetComponent<UnitMove>().enabled = true;
@@ -52,43 +52,41 @@ namespace StateOfClone.Units
 
         public void ShiftClickSelect(ISelectable unitToAdd)
         {
-            if (!selectedUnits.Contains(unitToAdd))
+            if (!_selectedUnits.Contains(unitToAdd))
             {
-                selectedUnits.Add(unitToAdd);
+                _selectedUnits.Add(unitToAdd);
                 unitToAdd.gameObject.transform.GetChild(0).gameObject.SetActive(true);
                 unitToAdd.OnSelected.Invoke();
-                // unitToAdd.gameObject.GetComponent<UnitMove>().enabled = true;
+                Debug.Log("selected" + unitToAdd.gameObject.name);
             }
             else
             {
                 unitToAdd.OnDeselected.Invoke();
-                // unitToAdd.gameObject.GetComponent<UnitMove>().enabled = false;
                 unitToAdd.gameObject.transform.GetChild(0).gameObject.SetActive(false);
-                selectedUnits.Remove(unitToAdd);
+                _selectedUnits.Remove(unitToAdd);
+                Debug.Log("deselected" + unitToAdd.gameObject.name);
             }
         }
 
         public void DragSelect(ISelectable unitToAdd)
         {
-            if (selectedUnits.Contains(unitToAdd))
+            if (_selectedUnits.Contains(unitToAdd))
                 return;
 
-            selectedUnits.Add(unitToAdd);
+            _selectedUnits.Add(unitToAdd);
             unitToAdd.gameObject.transform.GetChild(0).gameObject.SetActive(true);
             unitToAdd.OnSelected.Invoke();
-            // unitToAdd.gameObject.GetComponent<UnitMove>().enabled = true;
         }
 
         public void DeselectAll()
         {
-            foreach (ISelectable unit in selectedUnits)
+            foreach (ISelectable unit in _selectedUnits)
             {
                 unit.gameObject.transform.GetChild(0).gameObject.SetActive(false);
                 unit.OnDeselected.Invoke();
-                // unit.gameObject.GetComponent<UnitMove>().enabled = false;
             }
 
-            selectedUnits.Clear();
+            _selectedUnits.Clear();
         }
 
         public void Deselect(GameObject unitToDeselect)
