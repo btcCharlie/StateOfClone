@@ -162,12 +162,12 @@ namespace StateOfClone.Core
         /// <summary>
         /// Strength of cell position terturbation.
         /// </summary>
-        public const float cellPerturbStrength = 1f;
+        public const float cellPerturbStrength = 4f;
 
         /// <summary>
         /// Strength of vertical elevation perturbation.
         /// </summary>
-        public const float elevationPerturbStrength = 0f;
+        public const float elevationPerturbStrength = 1.75f;
 
         /// <summary>
         /// Perturn a position.
