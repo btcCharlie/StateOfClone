@@ -651,8 +651,6 @@ GameObject:
   - component: {fileID: 3021109005350917721}
   - component: {fileID: 5737723961400474026}
   - component: {fileID: 5385586533015645050}
-  - component: {fileID: 6619649841626833030}
-  - component: {fileID: 1088187677475917455}
   m_Layer: 7
   m_Name: Terrain Mesh
   m_TagString: Untagged
@@ -741,29 +739,3 @@ MonoBehaviour:
   useCellData: 1
   useUVCoordinates: 0
   useUV2Coordinates: 0
---- !u!64 &6619649841626833030
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9095350426579970700}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
---- !u!114 &1088187677475917455
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9095350426579970700}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 08564f580d197bf4e91675c4722f6478, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
