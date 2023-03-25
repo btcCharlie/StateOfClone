@@ -1,0 +1,17 @@
+{
+    "name": "GameMap",
+    "rootNamespace": "StateOfClone.GameMap",
+    "references": [
+        "GUID:9273c36cbff67ef4bb16d6eba10e674f",
+        "GUID:75469ad4d38634e559750d17036d5f7c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
