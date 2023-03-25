@@ -17,7 +17,7 @@ namespace StateOfClone.GameMap
 
         private Canvas gridCanvas;
 
-        void Awake()
+        private void Awake()
         {
             cells = new IHexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
             gridCanvas = GetComponentInChildren<Canvas>();
@@ -25,6 +25,12 @@ namespace StateOfClone.GameMap
             _triangulator = new HexTriangulator(
                 terrain, rivers, roads, water, waterShore, estuaries
             );
+        }
+
+        private void LateUpdate()
+        {
+            _triangulator.Triangulate(cells);
+            enabled = false;
         }
 
         /// <summary>
@@ -50,11 +56,5 @@ namespace StateOfClone.GameMap
         /// </summary>
         /// <param name="visible">Whether the UI should be visible.</param>
         public void ShowUI(bool visible) => gridCanvas.gameObject.SetActive(visible);
-
-        void LateUpdate()
-        {
-            _triangulator.Triangulate(cells);
-            enabled = false;
-        }
     }
 }
