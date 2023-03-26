@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using System.Collections.Generic;
 using StateOfClone.Core;
 
 namespace StateOfClone.Units
@@ -15,22 +16,59 @@ namespace StateOfClone.Units
         private Camera _camera;
 
         private Unit _unit;
+        private Rigidbody _rigidbody;
+
+        private bool _isSelected = false;
+
+        private bool _isMoving = false;
+        private List<Vector3> _path;
 
         private void Awake()
         {
             _playerInput = CustomInputManager.Instance.PlayerInput;
             _unitMoveAction = _playerInput.actions["MoveUnit"];
+            _unit = GetComponent<Unit>();
+            _rigidbody = GetComponent<Rigidbody>();
+
+            _path = new List<Vector3>();
         }
 
         private void Start()
         {
             _camera = Camera.main;
-            _unit = GetComponent<Unit>();
 
             _unit.OnSelected.AddListener(OnSelected);
             _unit.OnDeselected.AddListener(OnDeselected);
 
             enabled = false;
+        }
+
+        private void FixedUpdate()
+        {
+            if (!_isMoving)
+            {
+                enabled = _isSelected;
+                return;
+            }
+
+            if (_path.Count == 0)
+            {
+                Debug.Log("Path is empty");
+                _isMoving = false;
+                return;
+            }
+
+            Vector3 currentWaypoint = _path[^1];
+            if (Vector3.Distance(transform.position, currentWaypoint) < 0.1f)
+            {
+                _path.RemoveAt(_path.Count - 1);
+                return;
+            }
+
+            Vector3 direction = (currentWaypoint - transform.position).normalized;
+            _rigidbody.MovePosition(
+                transform.position + 10f * Time.fixedDeltaTime * direction
+                );
         }
 
         private void OnEnable()
@@ -51,12 +89,12 @@ namespace StateOfClone.Units
 
         private void OnSelected()
         {
-            enabled = true;
+            enabled = _isSelected = true;
         }
 
         private void OnDeselected()
         {
-            enabled = false;
+            _isSelected = false;
         }
 
         private void OnUnitMove(InputAction.CallbackContext context)
@@ -64,8 +102,11 @@ namespace StateOfClone.Units
             Ray ray = _camera.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _groundLayer))
             {
-                StopAllCoroutines();
-                StartCoroutine(MoveTo_Coroutine(hit.point));
+                _path.Clear();
+                //! this should first calculate waypoints to the target, putting in 
+                //! the target for simplicity
+                _path.Add(hit.point);
+                _isMoving = true;
             }
         }
 
