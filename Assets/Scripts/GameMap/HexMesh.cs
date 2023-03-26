@@ -77,7 +77,9 @@ namespace StateOfClone.GameMap
             ListPool<int>.Add(triangles);
             hexMesh.RecalculateNormals();
             if (useCollider)
-                meshCollider.sharedMesh = hexMesh;
+            {
+                meshCollider.sharedMesh = MeshUtils.MergeVertices(hexMesh);
+            }
         }
 
         /// <summary>

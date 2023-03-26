@@ -26,12 +26,12 @@ namespace StateOfClone.Units
             Instance = this;
 
             _ctrlEnableAction = PlayerInput.actions["CtrlEnable"];
-
             _ctrlEnableActions = new InputAction[_ctrlEnableActionNames.Length];
             for (int i = 0; i < _ctrlEnableActionNames.Length; i++)
                 _ctrlEnableActions[i] = PlayerInput.actions[_ctrlEnableActionNames[i]];
 
             _shiftEnableAction = PlayerInput.actions["ShiftEnable"];
+            _shiftEnableActions = new InputAction[_shiftEnableActionNames.Length];
             for (int i = 0; i < _shiftEnableActionNames.Length; i++)
                 _shiftEnableActions[i] = PlayerInput.actions[_shiftEnableActionNames[i]];
         }
