@@ -12,11 +12,11 @@ namespace StateOfClone.Units
         public IHexCell Location { get; set; }
         public float Orientation { get; set; }
 
-        public int Speed => _data.Speed;
+        public int Speed => UnitData.Speed;
 
-        public int VisionRange => _data.VisionRange;
+        public int VisionRange => UnitData.VisionRange;
 
-        [SerializeField] private UnitData _data;
+        [field: SerializeField] public UnitData UnitData { get; private set; }
 
         private Transform _body, _turret;
 
