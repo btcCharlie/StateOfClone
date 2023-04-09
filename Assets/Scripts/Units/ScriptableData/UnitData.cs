@@ -5,7 +5,8 @@ namespace StateOfClone.Units
     [CreateAssetMenu(fileName = "UnitData", menuName = "StateOfClone/UnitData", order = 0)]
     public class UnitData : ScriptableObject
     {
-        public int Speed;
+        public float MaxForce;
+        public float MaxSpeed;
         public int VisionRange;
         public int Health;
     }

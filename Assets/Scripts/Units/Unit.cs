@@ -12,7 +12,7 @@ namespace StateOfClone.Units
         public IHexCell Location { get; set; }
         public float Orientation { get; set; }
 
-        public int Speed => UnitData.Speed;
+        public int Speed => UnitData.MaxSpeed;
 
         public int VisionRange => UnitData.VisionRange;
 
