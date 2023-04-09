@@ -7,6 +7,7 @@ namespace StateOfClone.Units
     {
         public float MaxForce;
         public float MaxSpeed;
+        public float MaxTurnRateDegPerSec;
         public int VisionRange;
         public int Health;
     }

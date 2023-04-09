@@ -17,11 +17,14 @@ namespace StateOfClone.Units
 
         private Unit _unit;
         private Rigidbody _rigidbody;
+        private Locomotion _locomotion;
 
         private bool _isSelected = false;
 
         private bool _isMoving = false;
+
         private List<Vector3> _path;
+        private SteeringBehavior[] _steeringBehaviors;
 
         private Quaternion fromRotation, toRotation;
 
@@ -31,6 +34,9 @@ namespace StateOfClone.Units
             _unitMoveAction = _playerInput.actions["MoveUnit"];
             _unit = GetComponent<Unit>();
             _rigidbody = GetComponent<Rigidbody>();
+            _locomotion = GetComponent<Locomotion>();
+
+            _steeringBehaviors = GetComponents<SteeringBehavior>();
 
             _path = new List<Vector3>();
         }
@@ -45,65 +51,35 @@ namespace StateOfClone.Units
             enabled = false;
         }
 
-        private void FixedUpdate()
+        private void Update()
         {
-            if (!_isMoving)
+            if (_path == null || _path.Count == 0)
             {
-                enabled = _isSelected;
+                DisableIfDeselected();
                 return;
             }
 
-            float turnSpeedDegPerSec = 50f;
-
-            if (_path.Count == 0)
+            Vector3 target = _path[^1];
+            if (Vector3.Distance(_rigidbody.position, target) < 0.5f)
             {
-                // reached destination
-                Debug.Log("Reached destination");
-                _isMoving = false;
-                return;
-            }
-
-            Vector3 currentWaypoint = _path[^1];
-            if (Vector3.Distance(transform.position, currentWaypoint) < 0.5f)
-            {
-                // reached waypoint
-                Debug.Log("Reached waypoint");
+                Debug.Log("Reached target");
                 _path.RemoveAt(_path.Count - 1);
                 return;
             }
 
-            Vector3 direction = (currentWaypoint - transform.position).normalized;
-            toRotation = Quaternion.LookRotation(direction, transform.up);
-
-            // Vector3 forwardFromRotation = transform.rotation * Vector3.forward;
-            // Vector3 forwardToRotation = toRotation * Vector3.forward;
-            // float angleFromRotation = Mathf.Atan2(forwardFromRotation.x, forwardFromRotation.z) * Mathf.Rad2Deg;
-            // float angleToRotation = Mathf.Atan2(forwardToRotation.x, forwardToRotation.z) * Mathf.Rad2Deg;
-            // float angleDiff = Mathf.DeltaAngle(angleFromRotation, angleToRotation);
-
-            Vector3 toRotationEulers = toRotation.eulerAngles;
-            toRotationEulers.x = transform.rotation.eulerAngles.x;
-            toRotationEulers.z = transform.rotation.eulerAngles.z;
-            toRotation = Quaternion.Euler(toRotationEulers);
-
-            float angleToTurnDeg = Quaternion.Angle(transform.rotation, toRotation);
-
-            // tracked vehicle behavior - rotates in place and then moves
-            if (angleToTurnDeg > 1f)
+            Vector3 steeringForce = Vector3.zero;
+            foreach (SteeringBehavior steering in _steeringBehaviors)
             {
-                float turnProgressPerSec = turnSpeedDegPerSec / angleToTurnDeg;
+                steeringForce += steering.GetSteering(target);
+            }
+            steeringForce /= (float)_steeringBehaviors.Length;
 
-                _rigidbody.MoveRotation(Quaternion.Slerp(
-                    transform.rotation,
-                    toRotation,
-                    turnProgressPerSec * Time.fixedDeltaTime));
-            }
-            else
-            {
-                _rigidbody.MovePosition(
-                    transform.position + 10f * Time.fixedDeltaTime * transform.forward
-                    );
-            }
+            _locomotion.SteeringDirection = steeringForce;
+        }
+
+        private void DisableIfDeselected()
+        {
+            enabled = _isSelected;
         }
 
         private void OnDestroy()
@@ -135,48 +111,6 @@ namespace StateOfClone.Units
                 //! the target for simplicity
                 _path.Add(hit.point);
                 _isMoving = true;
-            }
-        }
-
-        private IEnumerator MoveTo_Coroutine(Vector3 point)
-        {
-            float travelSpeed = 10f;
-            point.y = transform.position.y;
-            yield return LookAt_Coroutine(point);
-
-            yield return new WaitForSeconds(0.1f);
-
-            while (Vector3.Distance(transform.position, point) > 0.1f)
-            {
-                Vector3 direction = (point - transform.position).normalized;
-                // transform.localRotation = Quaternion.LookRotation(direction);
-                transform.localPosition += Time.deltaTime * travelSpeed * direction;
-                yield return null;
-            }
-        }
-
-        private IEnumerator LookAt_Coroutine(Vector3 point)
-        {
-            float turnSpeedDegPerSec = 50f;
-
-            Quaternion fromRotation = transform.rotation;
-            Quaternion toRotation =
-                Quaternion.LookRotation(point - transform.position, transform.up);
-            float angleToRotate = Quaternion.Angle(fromRotation, toRotation);
-
-            if (angleToRotate > 0f)
-            {
-                float speed = turnSpeedDegPerSec / angleToRotate;
-
-                for (
-                    float t = Time.deltaTime * speed;
-                    t < 1f;
-                    t += Time.deltaTime * speed
-                )
-                {
-                    transform.rotation = Quaternion.Slerp(fromRotation, toRotation, t);
-                    yield return null;
-                }
             }
         }
 
