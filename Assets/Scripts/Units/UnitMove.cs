@@ -79,7 +79,7 @@ namespace StateOfClone.Units
 
         private void DisableIfDeselected()
         {
-            enabled = _isSelected;
+            enabled = _locomotion.enabled = _isSelected;
         }
 
         private void OnDestroy()
@@ -110,11 +110,11 @@ namespace StateOfClone.Units
                 //! this should first calculate waypoints to the target, putting in 
                 //! the target for simplicity
                 _path.Add(hit.point);
-                _isMoving = true;
+                _locomotion.enabled = true;
             }
         }
 
-        private void OnDrawGizmosSelected()
+        private void OnDrawGizmos()
         {
             if (_path == null || _path.Count == 0)
                 return;
@@ -124,14 +124,15 @@ namespace StateOfClone.Units
             // also, draw a line between the waypoints, ending at the transform's
             // current position
             Color prevColor = Gizmos.color;
-            Gizmos.color = Color.red;
+            Gizmos.color = Color.green;
+            Vector3 offset = Vector3.up;
             for (int i = 0; i < _path.Count - 1; i++)
             {
-                Gizmos.DrawSphere(_path[i], 0.5f);
-                Gizmos.DrawLine(_path[i], _path[i + 1]);
+                Gizmos.DrawSphere(_path[i] + offset, 0.5f);
+                Gizmos.DrawLine(_path[i] + offset, _path[i + 1] + offset);
             }
-            Gizmos.DrawSphere(_path[^1], 1f);
-            Gizmos.DrawLine(transform.position, _path[^1]);
+            Gizmos.DrawSphere(_path[^1] + offset, 1f);
+            Gizmos.DrawLine(transform.position + offset, _path[^1] + offset);
             Gizmos.color = prevColor;
         }
     }

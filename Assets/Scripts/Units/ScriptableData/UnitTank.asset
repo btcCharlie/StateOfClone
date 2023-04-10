@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dea2be0e1450645449c010bd863384e9, type: 3}
   m_Name: UnitTank
   m_EditorClassIdentifier: 
-  MaxForce: 100
+  MaxForce: 10
   MaxSpeed: 10
-  MaxTurnRateDegPerSec: 0
+  MaxTorque: 10
+  MaxTurnRateDegPerSec: 10
   VisionRange: 15
   Health: 0

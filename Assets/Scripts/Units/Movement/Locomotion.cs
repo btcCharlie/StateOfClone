@@ -11,22 +11,26 @@ namespace StateOfClone.Units
         /// </summary>
         public Vector3 SteeringDirection
         {
-            get { return steeringForce; }
+            get { return _steeringDirection; }
             set
             {
-                steeringForce = value;
-                steeringForce.y = 0f;
-                steeringForce = Vector3.ClampMagnitude(steeringForce, _unitData.MaxForce);
+                _steeringDirection = _steeringForce = value;
+                _steeringForce.y = 0f;
+                float torqueMagnitude = Vector3.SignedAngle(transform.forward, _steeringForce, Vector3.up);
+                torqueMagnitude *= 2f / 3f;
+                _steeringTorque = Vector3.up * Mathf.Clamp(torqueMagnitude, -_unitData.MaxTorque, _unitData.MaxTorque);
+                _steeringForce = Vector3.ClampMagnitude(_steeringForce, _unitData.MaxForce);
+                Debug.Log($"Direction: {_steeringDirection}; Force: {_steeringForce}; Torque: {_steeringTorque}");
             }
         }
-        private Vector3 steeringForce;
+        private Vector3 _steeringDirection;
+        private Vector3 _steeringForce;
+        private Vector3 _steeringTorque;
 
         private Unit _unit;
         private UnitData _unitData;
 
         private Rigidbody _rigidbody;
-
-        private bool _isSelected = false, _isMoving = false;
 
         private Quaternion fromRotation, toRotation;
 
@@ -39,73 +43,57 @@ namespace StateOfClone.Units
 
         private void Start()
         {
-            _unit.OnSelected.AddListener(OnSelected);
-            _unit.OnDeselected.AddListener(OnDeselected);
-
             enabled = false;
         }
 
         private void FixedUpdate()
         {
-            if (SteeringDirection == Vector3.zero)
-            {
-                enabled = _isSelected;
+            if (_steeringDirection == Vector3.zero)
                 return;
+
+            // Debug.Log($"Steering direction: {_steeringTorque}; Rigidbody velocit: {_rigidbody.velocity}");
+            if (
+                Vector3.Distance(
+                    _steeringDirection.normalized, _rigidbody.velocity.normalized
+                    ) > 0.1f
+                )
+            {
+                _rigidbody.AddRelativeTorque(_steeringTorque, ForceMode.Acceleration);
+                _rigidbody.angularVelocity = Vector3.ClampMagnitude(
+                    _rigidbody.angularVelocity,
+                    _unitData.MaxTurnRateDegPerSec
+                    );
+            }
+            else
+            {
+                _rigidbody.AddRelativeForce(_steeringForce, ForceMode.Acceleration);
+                _rigidbody.velocity = Vector3.ClampMagnitude(
+                    _rigidbody.velocity,
+                    _unitData.MaxSpeed
+                    );
             }
 
-            if (_rigidbody.)
-
-                _rigidbody.AddRelativeForce(steeringForce, ForceMode.Acceleration);
-            _rigidbody.velocity = Vector3.ClampMagnitude(_rigidbody.velocity, _unitData.MaxSpeed);
-
-            // Vector3 direction = (currentWaypoint - transform.position).normalized;
-            // toRotation = Quaternion.LookRotation(direction, transform.up);
-
-            // Vector3 toRotationEulers = toRotation.eulerAngles;
-            // toRotationEulers.x = transform.rotation.eulerAngles.x;
-            // toRotationEulers.z = transform.rotation.eulerAngles.z;
-            // toRotation = Quaternion.Euler(toRotationEulers);
-
-            // float angleToTurnDeg = Quaternion.Angle(transform.rotation, toRotation);
-
-            // // tracked vehicle behavior - rotates in place and then moves
-            // if (angleToTurnDeg > 1f)
-            // {
-            //     float turnProgressPerSec = _unitData.MaxTurnRateDegPerSec / angleToTurnDeg;
-
-            //     _rigidbody.MoveRotation(Quaternion.Slerp(
-            //         transform.rotation,
-            //         toRotation,
-            //         turnProgressPerSec * Time.fixedDeltaTime));
-            // }
-            // else
-            // {
-            //     _rigidbody.MovePosition(
-            //         transform.position + 10f * Time.fixedDeltaTime * transform.forward
-            //         );
-            // }
-        }
-
-        private void OnDestroy()
-        {
-            OnDeselected();
-            _unit.OnSelected.RemoveListener(OnSelected);
-            _unit.OnDeselected.RemoveListener(OnDeselected);
-        }
-
-        private void OnSelected()
-        {
-            enabled = _isSelected = true;
-        }
-
-        private void OnDeselected()
-        {
-            _isSelected = false;
         }
 
         public void StopMovement()
         {
             SteeringDirection = Vector3.zero;
+        }
+
+        private void OnDrawGizmos()
+        {
+            Vector3 from = transform.position + Vector3.up * 2f;
+            Color ogColor = Gizmos.color;
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(from, from + _steeringForce);
+            Gizmos.color = Color.blue;
+            Vector3 perpForce = Vector3.Cross(_steeringForce, Vector3.up);
+            Gizmos.DrawLine(
+                from + _steeringForce,
+                from + _steeringForce +
+                perpForce.normalized * _steeringTorque.magnitude
+                );
+            Gizmos.color = ogColor;
         }
     }
 }
