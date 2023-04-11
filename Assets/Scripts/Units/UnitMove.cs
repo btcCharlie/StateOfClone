@@ -21,8 +21,6 @@ namespace StateOfClone.Units
 
         private bool _isSelected = false;
 
-        private bool _isMoving = false;
-
         private List<Vector3> _path;
         private SteeringBehavior[] _steeringBehaviors;
 
