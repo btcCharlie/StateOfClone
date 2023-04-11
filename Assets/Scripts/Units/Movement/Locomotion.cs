@@ -51,12 +51,9 @@ namespace StateOfClone.Units
             if (_steeringDirection == Vector3.zero)
                 return;
 
-            // Debug.Log($"Steering direction: {_steeringTorque}; Rigidbody velocit: {_rigidbody.velocity}");
-            if (
-                Vector3.Distance(
-                    _steeringDirection.normalized, _rigidbody.velocity.normalized
-                    ) > 0.1f
-                )
+            // Debug.Log($"Steering direction: {_steeringTorque}; Rigidbody velocity: {_rigidbody.velocity}");
+            Debug.Log($"Transform forward: {transform.forward.normalized}; Steering direction: {_steeringDirection.normalized}");
+            if (IsAlignedTowards())
             {
                 _rigidbody.AddRelativeTorque(_steeringTorque, ForceMode.Acceleration);
                 _rigidbody.angularVelocity = Vector3.ClampMagnitude(
@@ -66,7 +63,8 @@ namespace StateOfClone.Units
             }
             else
             {
-                _rigidbody.AddRelativeForce(_steeringForce, ForceMode.Acceleration);
+                _rigidbody.AddRelativeForce(
+                    Vector3.forward * _steeringForce.magnitude, ForceMode.Acceleration);
                 _rigidbody.velocity = Vector3.ClampMagnitude(
                     _rigidbody.velocity,
                     _unitData.MaxSpeed
@@ -75,25 +73,33 @@ namespace StateOfClone.Units
 
         }
 
+        private bool IsAlignedTowards()
+        {
+            Vector3 steeringNormalized = _steeringDirection.normalized;
+            Vector3 forwardNormalized = transform.forward.normalized;
+            steeringNormalized.y = forwardNormalized.y = 0f;
+            return Vector3.Distance(steeringNormalized, forwardNormalized) > 0.1f;
+        }
+
         public void StopMovement()
         {
             SteeringDirection = Vector3.zero;
         }
 
-        private void OnDrawGizmos()
-        {
-            Vector3 from = transform.position + Vector3.up * 2f;
-            Color ogColor = Gizmos.color;
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(from, from + _steeringForce);
-            Gizmos.color = Color.blue;
-            Vector3 perpForce = Vector3.Cross(_steeringForce, Vector3.up);
-            Gizmos.DrawLine(
-                from + _steeringForce,
-                from + _steeringForce +
-                perpForce.normalized * _steeringTorque.magnitude
-                );
-            Gizmos.color = ogColor;
-        }
+        // private void OnDrawGizmos()
+        // {
+        //     Vector3 from = transform.position + Vector3.up * 2f;
+        //     Color ogColor = Gizmos.color;
+        //     Gizmos.color = Color.red;
+        //     Gizmos.DrawLine(from, from + _steeringForce);
+        //     Gizmos.color = Color.blue;
+        //     Vector3 perpForce = Vector3.Cross(_steeringForce, Vector3.up);
+        //     Gizmos.DrawLine(
+        //         from + _steeringForce,
+        //         from + _steeringForce +
+        //         perpForce.normalized * _steeringTorque.magnitude
+        //         );
+        //     Gizmos.color = ogColor;
+        // }
     }
 }
