@@ -53,8 +53,9 @@ namespace StateOfClone.Units
 
             // Debug.Log($"Steering direction: {_steeringTorque}; Rigidbody velocity: {_rigidbody.velocity}");
             Debug.Log($"Transform forward: {transform.forward.normalized}; Steering direction: {_steeringDirection.normalized}");
-            if (IsAlignedTowards())
+            if (!IsAlignedTowards())
             {
+                _rigidbody.velocity = Vector3.zero;
                 _rigidbody.AddRelativeTorque(_steeringTorque, ForceMode.Acceleration);
                 _rigidbody.angularVelocity = Vector3.ClampMagnitude(
                     _rigidbody.angularVelocity,
@@ -63,6 +64,7 @@ namespace StateOfClone.Units
             }
             else
             {
+                _rigidbody.angularVelocity = Vector3.zero;
                 _rigidbody.AddRelativeForce(
                     Vector3.forward * _steeringForce.magnitude, ForceMode.Acceleration);
                 _rigidbody.velocity = Vector3.ClampMagnitude(
@@ -71,6 +73,8 @@ namespace StateOfClone.Units
                     );
             }
 
+            _rigidbody.AddForce(Vector3.up * 9.81f);
+
         }
 
         private bool IsAlignedTowards()
@@ -78,7 +82,7 @@ namespace StateOfClone.Units
             Vector3 steeringNormalized = _steeringDirection.normalized;
             Vector3 forwardNormalized = transform.forward.normalized;
             steeringNormalized.y = forwardNormalized.y = 0f;
-            return Vector3.Distance(steeringNormalized, forwardNormalized) > 0.1f;
+            return Vector3.Distance(steeringNormalized, forwardNormalized) <= 0.02f;
         }
 
         public void StopMovement()
