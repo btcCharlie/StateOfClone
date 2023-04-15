@@ -18,20 +18,23 @@ namespace StateOfClone.Units
             return _seekSteering;
         }
 
-        private void OnDrawGizmos()
-        {
-            Color ogColor = Gizmos.color;
+        // private void OnDrawGizmos()
+        // {
+        //     if (_rb == null)
+        //         return;
 
-            Vector3 offset = Vector3.up * 3f;
-            Vector3 from = transform.position + offset;
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(from, from + _desiredVelocity);
-            Gizmos.color = Color.blue;
-            Gizmos.DrawLine(from, from + _seekSteering);
-            Gizmos.color = Color.green;
-            Gizmos.DrawLine(from, from + _rb.velocity);
+        //     Color ogColor = Gizmos.color;
 
-            Gizmos.color = ogColor;
-        }
+        //     Vector3 offset = Vector3.up * 3f;
+        //     Vector3 from = transform.position + offset;
+        //     Gizmos.color = Color.red;
+        //     Gizmos.DrawLine(from, from + _desiredVelocity);
+        //     Gizmos.color = Color.blue;
+        //     Gizmos.DrawLine(from, from + _seekSteering);
+        //     Gizmos.color = Color.green;
+        //     Gizmos.DrawLine(from, from + _rb.velocity);
+
+        //     Gizmos.color = ogColor;
+        // }
     }
 }
