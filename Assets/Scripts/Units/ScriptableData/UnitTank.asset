@@ -15,6 +15,6 @@ MonoBehaviour:
   MaxForce: 20
   MaxSpeed: 10
   MaxTorque: 2
-  MaxTurnRateDegPerSec: 30
+  MaxTurnRate: 30
   VisionRange: 15
   Health: 0
