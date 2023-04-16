@@ -9,23 +9,32 @@ namespace StateOfClone.Units
         /// <summary>
         /// Local steering direction in 3D space
         /// </summary>
-        public Vector3 SteeringDirection
+        public Vector3 Steering
         {
-            get { return _steeringDirection; }
+            get { return _steering; }
             set
             {
-                _steeringDirection = _steeringForce = value;
+                _steering = _steeringForce = value;
                 _steeringForce.y = 0f;
-                float torqueMagnitude = Vector3.SignedAngle(transform.forward, _steeringForce, Vector3.up);
-                torqueMagnitude *= 2f / 3f;
-                _steeringTorque = Vector3.up * Mathf.Clamp(torqueMagnitude, -_unitData.MaxAngularAcceleration, _unitData.MaxAngularAcceleration);
-                _steeringForce = Vector3.ClampMagnitude(_steeringForce, _unitData.MaxAcceleration);
-                // Debug.Log($"Direction: {_steeringDirection}; Force: {_steeringForce}; Torque: {_steeringTorque}");
+                _torque =
+                    Vector3.SignedAngle(transform.forward, _steeringForce, Vector3.up);
+
+                float speedMultiplier = 100f * _steeringForce.magnitude / _unitData.MaxSpeed;
+                Speed = Mathf.Clamp(
+                    speedMultiplier * _unitData.MaxSpeed,
+                    -_unitData.MaxSpeed, _unitData.MaxSpeed
+                    );
+
+                _steeringTorque = Vector3.up * Mathf.Clamp(
+                    _torque,
+                    -_unitData.MaxAngularAcceleration,
+                    _unitData.MaxAngularAcceleration
+                    );
+                _steeringForce =
+                    Vector3.ClampMagnitude(_steeringForce, _unitData.MaxAcceleration);
             }
         }
-        private Vector3 _steeringDirection;
-        private Vector3 _steeringForce;
-        private Vector3 _steeringTorque;
+        private Vector3 _steering, _steeringForce, _steeringTorque;
         private Vector3 _tangent, _normal;
 
         [SerializeField] private Transform _groundCheck;
@@ -36,10 +45,9 @@ namespace StateOfClone.Units
 
         public Vector3 Velocity { get; private set; }
         public Vector3 AngularVelocity { get; private set; }
-
-        private Vector3 _acceleration, _angularAcceleration;
-
-        [SerializeField] private int _recentNormalsCount = 10;
+        public float Speed { get; private set; }
+        private float _thrust;
+        private float _torque;
 
         private Unit _unit;
         private UnitData _unitData;
@@ -48,6 +56,7 @@ namespace StateOfClone.Units
 
         private LayerMask _groundLayer;
 
+        [SerializeField] private int _recentNormalsCount = 10;
         private Vector3[] _recentNormals;
 
         private void Awake()
@@ -58,7 +67,7 @@ namespace StateOfClone.Units
             _groundLayer = LayerMask.GetMask("Ground");
             _recentNormals = new Vector3[_recentNormalsCount];
             _activeAlignmentTolerance = _lowerAlignmentTolerance;
-            Velocity = transform.forward * 10f; // Vector3.zero;
+            Velocity = Vector3.zero;
             AngularVelocity = Vector3.zero;
         }
 
@@ -85,11 +94,11 @@ namespace StateOfClone.Units
 
         private void FixedUpdate()
         {
-            if (_steeringDirection == Vector3.zero)
+            if (_steering == Vector3.zero)
             {
                 return;
             }
-            // cast a ray down to get the normal of the ground
+
             float hitGroundHeight;
             Vector3 hitNormal;
             if (Physics.Raycast(
@@ -97,7 +106,7 @@ namespace StateOfClone.Units
                 out RaycastHit hitDownwards, 10f, _groundLayer
             ))
             {
-                Debug.Log("Hit downwards");
+                // Debug.Log("Hit downwards");
                 hitGroundHeight = hitDownwards.point.y;
                 hitNormal = hitDownwards.normal;
             }
@@ -108,14 +117,14 @@ namespace StateOfClone.Units
                     out RaycastHit hitUpwards, 10f, _groundLayer
                 ))
                 {
-                    Debug.Log("Hit upwards");
+                    // Debug.Log("Hit upwards");
                     hitGroundHeight = hitUpwards.point.y;
                     hitNormal = -hitUpwards.normal;
                 }
                 else
                 {
                     //TODO: unit is somewhere 10f units above or below ground
-                    Debug.Log("Hit nowhere");
+                    // Debug.Log("Hit nowhere");
                     return;
                 }
             }
@@ -127,41 +136,53 @@ namespace StateOfClone.Units
             _tangent = Vector3.Cross(-_normal, transform.right);
             _rigidbody.rotation = Quaternion.LookRotation(_tangent, _normal);
 
-            if (!IsAlignedTowards(_steeringDirection, _activeAlignmentTolerance))
+            if (!IsAlignedTowards(_steering, _activeAlignmentTolerance))
             {
-                _acceleration = -Velocity;
             }
             else
             {
-                _acceleration = Vector3.ClampMagnitude(
-                    _steeringDirection.magnitude * transform.forward,
-                    _unitData.MaxAcceleration
+            }
+
+            Vector3.Cross(_steering, transform.up);
+
+            // Speed += _thrust * Time.fixedDeltaTime;
+            Speed = Mathf.Clamp(Speed, -_unitData.MaxSpeed, _unitData.MaxSpeed);
+            Velocity = transform.forward * Speed;
+            Quaternion headingChangeStep = Quaternion.Euler(_steeringTorque * Time.fixedDeltaTime);
+            Quaternion targetRotation = Quaternion.LookRotation(_steering, _normal);
+            headingChangeStep.ToAngleAxis(out float angle, out Vector3 axis);
+            Debug.Log($"Angle: {angle}; Axis: {axis}");
+            if (_steeringTorque.magnitude * Time.fixedDeltaTime < 2f)
+            {
+                _rigidbody.rotation = targetRotation;
+            }
+            else
+            {
+                // _rigidbody.rotation *=
+                //     Quaternion.Euler(_steeringTorque * Time.fixedDeltaTime);
+                _rigidbody.rotation = Quaternion.RotateTowards(
+                    _rigidbody.rotation, targetRotation,
+                    _steeringTorque.magnitude * Time.fixedDeltaTime
                     );
             }
 
-            _angularAcceleration = Vector3.ClampMagnitude(
-                _steeringTorque, _unitData.MaxAngularAcceleration
-                );
+            // _rigidbody.rotation *=
+            //     Quaternion.Euler(_steeringTorque * Time.fixedDeltaTime);
 
-            Vector3 angularFriction = _unitData.FrictionCoefficient * AngularVelocity;
-            AngularVelocity += (_angularAcceleration - angularFriction) * Time.fixedDeltaTime;
-            AngularVelocity =
-                Vector3.ClampMagnitude(AngularVelocity, _unitData.MaxTurnRate);
-            _rigidbody.rotation *=
-               Quaternion.Euler(AngularVelocity * Time.fixedDeltaTime);
+            _rigidbody.position +=
+                Time.fixedDeltaTime * Velocity;
 
-            Vector3 friction = _unitData.FrictionCoefficient * Velocity;
-            Velocity += (_acceleration - friction) * Time.fixedDeltaTime;
-            Velocity = Vector3.ClampMagnitude(Velocity, _unitData.MaxSpeed);
-            _rigidbody.position += Velocity * Time.fixedDeltaTime;
+            // slow down
 
-            Debug.Log($"Speed: {Velocity.magnitude}; Angular speed: {AngularVelocity.magnitude}");
+
+
+
+            // Debug.Log($"Speed: {Velocity.magnitude}; Angular speed: {AngularVelocity.magnitude}");
             // Debug.Log($"RB position: {_rigidbody.position}; RB rotation: {_rigidbody.rotation}");
         }
 
         private void PlaceSelfOnGround(float groundHeight)
         {
-            Debug.Log($"Ground height: {groundHeight}; RB height: {_rigidbody.position.y}");
             _rigidbody.position =
                 new Vector3(_rigidbody.position.x, groundHeight, _rigidbody.position.z);
         }
@@ -188,7 +209,7 @@ namespace StateOfClone.Units
 
         public void StopMovement()
         {
-            SteeringDirection = Vector3.zero;
+            Steering = Vector3.zero;
         }
 
         private Vector3 GetNormalMovingAverage()
