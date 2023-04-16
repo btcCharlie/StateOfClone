@@ -57,6 +57,7 @@ namespace StateOfClone.Units
                 _locomotion.enabled = false;
                 return;
             }
+            _locomotion.enabled = true;
 
             Vector3 target = _path[^1];
             if (Vector3.Distance(_rigidbody.position, target) < 0.5f)
@@ -109,7 +110,6 @@ namespace StateOfClone.Units
                 //! this should first calculate waypoints to the target, putting in 
                 //! the target for simplicity
                 _path.Add(hit.point);
-                _locomotion.enabled = true;
             }
         }
 

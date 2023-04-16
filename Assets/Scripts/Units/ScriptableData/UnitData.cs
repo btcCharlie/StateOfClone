@@ -8,7 +8,7 @@ namespace StateOfClone.Units
         /// <summary>
         /// Maximum acceleration in units per second squared.
         /// </summary>
-        public float MaxForce;
+        public float MaxAcceleration;
         /// <summary>
         /// Maximum speed (velocity magnitude) in units per second.
         /// </summary>
@@ -16,12 +16,14 @@ namespace StateOfClone.Units
         /// <summary>
         /// Maximum angular acceleration in degrees per second squared.
         /// </summary>
-        public float MaxTorque;
+        public float MaxAngularAcceleration;
         /// <summary>
         /// Maximum rate of turning in degrees per second.
         /// </summary>
         public float MaxTurnRate;
         public int VisionRange;
         public int Health;
+
+        public float FrictionCoefficient;
     }
 }

@@ -32,15 +32,17 @@ namespace StateOfClone.Units
             Color ogColor = Gizmos.color;
 
             Vector3 offset = Vector3.up * 3f;
-            Vector3 from = transform.position + offset;
-            Gizmos.color = Color.black;
-            Gizmos.DrawLine(from, from + _desiredVelocity);
+            Vector3 transformPosition = transform.position + offset;
+            Gizmos.color = Color.grey;
+            Gizmos.DrawLine(transformPosition, transformPosition + _desiredVelocity);
             // Gizmos.color = Color.green;
             // Gizmos.DrawLine(from, from + _locomotion.Velocity * 10f);
+            // Gizmos.color = Color.green;
+            // Gizmos.DrawLine(transformPosition, transformPosition + _locomotion.Velocity);
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(
-                from + _locomotion.Velocity * 10f,
-                from + _locomotion.Velocity * 10f + _seekSteering
+                transformPosition + _locomotion.Velocity,
+                transformPosition + _locomotion.Velocity + _seekSteering
             );
 
             Gizmos.color = ogColor;

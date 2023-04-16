@@ -18,8 +18,8 @@ namespace StateOfClone.Units
                 _steeringForce.y = 0f;
                 float torqueMagnitude = Vector3.SignedAngle(transform.forward, _steeringForce, Vector3.up);
                 torqueMagnitude *= 2f / 3f;
-                _steeringTorque = Vector3.up * Mathf.Clamp(torqueMagnitude, -_unitData.MaxTorque, _unitData.MaxTorque);
-                _steeringForce = Vector3.ClampMagnitude(_steeringForce, _unitData.MaxForce);
+                _steeringTorque = Vector3.up * Mathf.Clamp(torqueMagnitude, -_unitData.MaxAngularAcceleration, _unitData.MaxAngularAcceleration);
+                _steeringForce = Vector3.ClampMagnitude(_steeringForce, _unitData.MaxAcceleration);
                 // Debug.Log($"Direction: {_steeringDirection}; Force: {_steeringForce}; Torque: {_steeringTorque}");
             }
         }
@@ -33,10 +33,11 @@ namespace StateOfClone.Units
         private float _activeAlignmentTolerance;
         [SerializeField] private float _upperAlignmentTolerance = 40f; // upper threshold angle for alignment check
         [SerializeField] private float _lowerAlignmentTolerance = 1f; // lower threshold angle for alignment check
-        [SerializeField] private float _stopSpeed = 0.1f; // distance threshold for stopping movement
 
         public Vector3 Velocity { get; private set; }
-        private Vector3 _angularVelocity;
+        public Vector3 AngularVelocity { get; private set; }
+
+        private Vector3 _acceleration, _angularAcceleration;
 
         [SerializeField] private int _recentNormalsCount = 10;
 
@@ -44,8 +45,6 @@ namespace StateOfClone.Units
         private UnitData _unitData;
 
         private Rigidbody _rigidbody;
-
-        private Quaternion fromRotation, toRotation;
 
         private LayerMask _groundLayer;
 
@@ -59,8 +58,8 @@ namespace StateOfClone.Units
             _groundLayer = LayerMask.GetMask("Ground");
             _recentNormals = new Vector3[_recentNormalsCount];
             _activeAlignmentTolerance = _lowerAlignmentTolerance;
-            Velocity = Vector3.zero;
-            _angularVelocity = Vector3.zero;
+            Velocity = transform.forward * 10f; // Vector3.zero;
+            AngularVelocity = Vector3.zero;
         }
 
         private void Start()
@@ -81,73 +80,90 @@ namespace StateOfClone.Units
         private void OnDisable()
         {
             Velocity = Vector3.zero;
-            _angularVelocity = Vector3.zero;
+            AngularVelocity = Vector3.zero;
         }
 
         private void FixedUpdate()
         {
             if (_steeringDirection == Vector3.zero)
-                return;
-
-            // cast a ray down to get the normal of the ground
-            if (!Physics.Raycast(
-                _groundCheck.position, Vector3.down,
-                out RaycastHit hit, 10f, _groundLayer
-            ))
             {
-                //* probably in the air - manage somehow later
                 return;
             }
-
-            UpdateRecentNormals(hit.normal);
-
-            _normal = GetNormalMovingAverage();
-            _tangent = Vector3.Cross(-_normal, transform.right);
-            _rigidbody.transform.rotation = Quaternion.LookRotation(_tangent, _normal);
-
-            // check if the units heading is misaligned with the steering direction
-            if (!IsAlignedTowards(_steeringDirection, _activeAlignmentTolerance))
+            // cast a ray down to get the normal of the ground
+            float hitGroundHeight;
+            Vector3 hitNormal;
+            if (Physics.Raycast(
+                _groundCheck.position, Vector3.down,
+                out RaycastHit hitDownwards, 10f, _groundLayer
+            ))
             {
-                // stop the movement and rotate towards the steering direction
-                _rigidbody.transform.rotation = Quaternion.RotateTowards(
-                    _rigidbody.transform.rotation,
-                    Quaternion.LookRotation(_steeringDirection, transform.up),
-                    _unitData.MaxTurnRate * Time.fixedDeltaTime
-                );
-                // Debug.Log("Not aligned towards target - rotated up to " +
-                //     $"{_unitData.MaxTurnRate * Time.fixedDeltaTime} degrees");
+                Debug.Log("Hit downwards");
+                hitGroundHeight = hitDownwards.point.y;
+                hitNormal = hitDownwards.normal;
             }
             else
             {
-                // move forward and rotate towards the steering direction at the 
-                // same time
-                Velocity +=
-                    _steeringForce.magnitude * Time.fixedDeltaTime * transform.forward;
-                // limit the velocity to the maximum speed
-                Velocity = Vector3.ClampMagnitude(Velocity, _unitData.MaxSpeed);
-
-                Quaternion newRotation = Quaternion.RotateTowards(
-                    _rigidbody.transform.rotation,
-                    Quaternion.LookRotation(Velocity, transform.up),
-                    _unitData.MaxTurnRate * Time.fixedDeltaTime
-                );
-                Vector3 newPosition =
-                    _rigidbody.transform.position + Velocity * Time.fixedDeltaTime;
-
-                _rigidbody.transform.SetPositionAndRotation(newPosition, newRotation);
-
-                Debug.Log($"Velocity: {Velocity}");
-
-                // Debug.Log("Aligned towards target - moved forward by " +
-                //     $"{_steeringForce.magnitude * Time.fixedDeltaTime} units and " +
-                //     $"rotated up to {_unitData.MaxTurnRate * Time.fixedDeltaTime} degrees");
+                if (Physics.Raycast(
+                    _groundCheck.position - Vector3.up, Vector3.up,
+                    out RaycastHit hitUpwards, 10f, _groundLayer
+                ))
+                {
+                    Debug.Log("Hit upwards");
+                    hitGroundHeight = hitUpwards.point.y;
+                    hitNormal = -hitUpwards.normal;
+                }
+                else
+                {
+                    //TODO: unit is somewhere 10f units above or below ground
+                    Debug.Log("Hit nowhere");
+                    return;
+                }
             }
 
-            _rigidbody.transform.position = new Vector3(
-                _rigidbody.transform.position.x,
-                hit.point.y,
-                _rigidbody.transform.position.z
-            );
+            PlaceSelfOnGround(hitGroundHeight);
+
+            AddNewNormal(hitNormal);
+            _normal = GetNormalMovingAverage();
+            _tangent = Vector3.Cross(-_normal, transform.right);
+            _rigidbody.rotation = Quaternion.LookRotation(_tangent, _normal);
+
+            if (!IsAlignedTowards(_steeringDirection, _activeAlignmentTolerance))
+            {
+                _acceleration = -Velocity;
+            }
+            else
+            {
+                _acceleration = Vector3.ClampMagnitude(
+                    _steeringDirection.magnitude * transform.forward,
+                    _unitData.MaxAcceleration
+                    );
+            }
+
+            _angularAcceleration = Vector3.ClampMagnitude(
+                _steeringTorque, _unitData.MaxAngularAcceleration
+                );
+
+            Vector3 angularFriction = _unitData.FrictionCoefficient * AngularVelocity;
+            AngularVelocity += (_angularAcceleration - angularFriction) * Time.fixedDeltaTime;
+            AngularVelocity =
+                Vector3.ClampMagnitude(AngularVelocity, _unitData.MaxTurnRate);
+            _rigidbody.rotation *=
+               Quaternion.Euler(AngularVelocity * Time.fixedDeltaTime);
+
+            Vector3 friction = _unitData.FrictionCoefficient * Velocity;
+            Velocity += (_acceleration - friction) * Time.fixedDeltaTime;
+            Velocity = Vector3.ClampMagnitude(Velocity, _unitData.MaxSpeed);
+            _rigidbody.position += Velocity * Time.fixedDeltaTime;
+
+            Debug.Log($"Speed: {Velocity.magnitude}; Angular speed: {AngularVelocity.magnitude}");
+            // Debug.Log($"RB position: {_rigidbody.position}; RB rotation: {_rigidbody.rotation}");
+        }
+
+        private void PlaceSelfOnGround(float groundHeight)
+        {
+            Debug.Log($"Ground height: {groundHeight}; RB height: {_rigidbody.position.y}");
+            _rigidbody.position =
+                new Vector3(_rigidbody.position.x, groundHeight, _rigidbody.position.z);
         }
 
         private bool IsAlignedTowards(Vector3 direction, float toleranceDegrees)
@@ -155,8 +171,8 @@ namespace StateOfClone.Units
             Vector3 forward = transform.forward;
             direction.y = forward.y = 0f;
             float angleDifference = Vector3.Angle(forward, direction);
-            Debug.Log($"Angle distance to align: {angleDifference}");
-            Debug.Log($"Active alignment tolerance: {toleranceDegrees}");
+            // Debug.Log($"Angle distance to align: {angleDifference}");
+            // Debug.Log($"Active alignment tolerance: {toleranceDegrees}");
 
             if (angleDifference < _lowerAlignmentTolerance)
             {
@@ -185,7 +201,7 @@ namespace StateOfClone.Units
             return sum / _recentNormals.Length;
         }
 
-        private void UpdateRecentNormals(Vector3 newNormal)
+        private void AddNewNormal(Vector3 newNormal)
         {
             for (int i = 0; i < _recentNormals.Length - 1; i++)
             {
@@ -196,7 +212,7 @@ namespace StateOfClone.Units
 
         private void OnDrawGizmos()
         {
-            Vector3 from = transform.position + Vector3.up * 2f;
+            Vector3 from = transform.position + Vector3.up * 3f;
             Color ogColor = Gizmos.color;
             // Gizmos.color = Color.red;
             // Gizmos.DrawLine(from, from + _steeringForce);
@@ -208,12 +224,12 @@ namespace StateOfClone.Units
             //     perpForce.normalized * _steeringTorque.magnitude
             //     );
 
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawLine(from, from + _tangent * 10f);
-            Gizmos.color = Color.blue;
-            Gizmos.DrawLine(from, from + transform.forward * 10f);
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(from, from + Velocity);
+            // Gizmos.color = Color.blue;
+            // Gizmos.DrawLine(from, from + transform.forward * 10f);
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(from, from + _normal * 10f);
+            Gizmos.DrawLine(from, from + AngularVelocity);
 
             Gizmos.color = ogColor;
         }
