@@ -69,6 +69,7 @@ namespace StateOfClone.Units
             _activeAlignmentTolerance = _lowerAlignmentTolerance;
             Velocity = Vector3.zero;
             AngularVelocity = Vector3.zero;
+            Speed = 0f;
         }
 
         private void Start()
@@ -90,6 +91,7 @@ namespace StateOfClone.Units
         {
             Velocity = Vector3.zero;
             AngularVelocity = Vector3.zero;
+            Speed = 0f;
         }
 
         private void FixedUpdate()
@@ -143,42 +145,27 @@ namespace StateOfClone.Units
             {
             }
 
-            Vector3.Cross(_steering, transform.up);
-
             // Speed += _thrust * Time.fixedDeltaTime;
             Speed = Mathf.Clamp(Speed, -_unitData.MaxSpeed, _unitData.MaxSpeed);
             Velocity = transform.forward * Speed;
-            Quaternion headingChangeStep = Quaternion.Euler(_steeringTorque * Time.fixedDeltaTime);
             Quaternion targetRotation = Quaternion.LookRotation(_steering, _normal);
-            headingChangeStep.ToAngleAxis(out float angle, out Vector3 axis);
-            Debug.Log($"Angle: {angle}; Axis: {axis}");
-            if (_steeringTorque.magnitude * Time.fixedDeltaTime < 2f)
-            {
-                _rigidbody.rotation = targetRotation;
-            }
-            else
-            {
-                // _rigidbody.rotation *=
-                //     Quaternion.Euler(_steeringTorque * Time.fixedDeltaTime);
-                _rigidbody.rotation = Quaternion.RotateTowards(
-                    _rigidbody.rotation, targetRotation,
-                    _steeringTorque.magnitude * Time.fixedDeltaTime
-                    );
-            }
 
-            // _rigidbody.rotation *=
-            //     Quaternion.Euler(_steeringTorque * Time.fixedDeltaTime);
+            float steeringMagnitude = new Vector3(_steering.x, 0f, _steering.z).magnitude;
+
+            // Interpolate between the maximum step size and zero based on the angle
+            float step = Mathf.Lerp(
+                0f, _steeringTorque.magnitude, steeringMagnitude / 3f
+                );
+            Debug.Log($"Steering mag: {steeringMagnitude}; Step: {step}; Max step: {_steeringTorque.magnitude}");
+
+            // Rotate towards the target using the interpolated step size
+            _rigidbody.rotation = Quaternion.RotateTowards(
+                _rigidbody.rotation, targetRotation,
+                step * Time.fixedDeltaTime
+            );
 
             _rigidbody.position +=
                 Time.fixedDeltaTime * Velocity;
-
-            // slow down
-
-
-
-
-            // Debug.Log($"Speed: {Velocity.magnitude}; Angular speed: {AngularVelocity.magnitude}");
-            // Debug.Log($"RB position: {_rigidbody.position}; RB rotation: {_rigidbody.rotation}");
         }
 
         private void PlaceSelfOnGround(float groundHeight)
