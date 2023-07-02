@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using System.Collections.Generic;
 using StateOfClone.Core;
 
 namespace StateOfClone.Units
@@ -15,17 +16,32 @@ namespace StateOfClone.Units
         private Camera _camera;
 
         private Unit _unit;
+        private Rigidbody _rigidbody;
+        private Locomotion _locomotion;
+
+        private bool _isSelected = false;
+
+        private List<Vector3> _path;
+        private SteeringBehavior[] _steeringBehaviors;
+
+        private Quaternion fromRotation, toRotation;
 
         private void Awake()
         {
             _playerInput = CustomInputManager.Instance.PlayerInput;
             _unitMoveAction = _playerInput.actions["MoveUnit"];
+            _unit = GetComponent<Unit>();
+            _rigidbody = GetComponent<Rigidbody>();
+            _locomotion = GetComponent<Locomotion>();
+
+            _steeringBehaviors = GetComponents<SteeringBehavior>();
+
+            _path = new List<Vector3>();
         }
 
         private void Start()
         {
             _camera = Camera.main;
-            _unit = GetComponent<Unit>();
 
             _unit.OnSelected.AddListener(OnSelected);
             _unit.OnDeselected.AddListener(OnDeselected);
@@ -33,30 +49,56 @@ namespace StateOfClone.Units
             enabled = false;
         }
 
-        private void OnEnable()
+        private void Update()
         {
-            _unitMoveAction.performed += OnUnitMove;
+            if (_path == null || _path.Count == 0)
+            {
+                DisableIfDeselected();
+                _locomotion.enabled = false;
+                return;
+            }
+            _locomotion.enabled = true;
+
+            Vector3 target = _path[^1];
+            if (Vector3.Distance(_rigidbody.position, target) < 0.5f)
+            {
+                Debug.Log("Reached target");
+                _path.RemoveAt(_path.Count - 1);
+                return;
+            }
+
+            Vector3 steeringForce = Vector3.zero;
+            foreach (SteeringBehavior steering in _steeringBehaviors)
+            {
+                steeringForce += steering.GetSteering(target).Steering;
+            }
+            steeringForce /= (float)_steeringBehaviors.Length;
+
+            _locomotion.Steering = steeringForce;
         }
 
-        private void OnDisable()
+        private void DisableIfDeselected()
         {
-            _unitMoveAction.performed -= OnUnitMove;
+            enabled = _locomotion.enabled = _isSelected;
         }
 
         private void OnDestroy()
         {
+            OnDeselected();
             _unit.OnSelected.RemoveListener(OnSelected);
             _unit.OnDeselected.RemoveListener(OnDeselected);
         }
 
         private void OnSelected()
         {
-            enabled = true;
+            enabled = _isSelected = true;
+            _unitMoveAction.performed += OnUnitMove;
         }
 
         private void OnDeselected()
         {
-            enabled = false;
+            _unitMoveAction.performed -= OnUnitMove;
+            _isSelected = false;
         }
 
         private void OnUnitMove(InputAction.CallbackContext context)
@@ -64,51 +106,33 @@ namespace StateOfClone.Units
             Ray ray = _camera.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _groundLayer))
             {
-                StopAllCoroutines();
-                StartCoroutine(MoveTo_Coroutine(hit.point));
+                _path.Clear();
+                //! this should first calculate waypoints to the target, putting in 
+                //! the target for simplicity
+                _path.Add(hit.point);
             }
         }
 
-        private IEnumerator MoveTo_Coroutine(Vector3 point)
+        private void OnDrawGizmos()
         {
-            float travelSpeed = 10f;
-            point.y = transform.position.y;
-            yield return LookAt_Coroutine(point);
+            if (_path == null || _path.Count == 0)
+                return;
 
-            yield return new WaitForSeconds(0.1f);
-
-            while (Vector3.Distance(transform.position, point) > 0.1f)
+            // draw the waypoints from path as small red spheres with the 
+            // currently active waypoint (the last one) as a larger red sphere
+            // also, draw a line between the waypoints, ending at the transform's
+            // current position
+            Color prevColor = Gizmos.color;
+            Gizmos.color = Color.green;
+            Vector3 offset = Vector3.up;
+            for (int i = 0; i < _path.Count - 1; i++)
             {
-                Vector3 direction = (point - transform.position).normalized;
-                // transform.localRotation = Quaternion.LookRotation(direction);
-                transform.localPosition += Time.deltaTime * travelSpeed * direction;
-                yield return null;
+                Gizmos.DrawSphere(_path[i] + offset, 0.5f);
+                Gizmos.DrawLine(_path[i] + offset, _path[i + 1] + offset);
             }
-        }
-
-        private IEnumerator LookAt_Coroutine(Vector3 point)
-        {
-            float turnSpeedDegPerSec = 50f;
-
-            Quaternion fromRotation = transform.rotation;
-            Quaternion toRotation =
-                Quaternion.LookRotation(point - transform.position, transform.up);
-            float angleToRotate = Quaternion.Angle(fromRotation, toRotation);
-
-            if (angleToRotate > 0f)
-            {
-                float speed = turnSpeedDegPerSec / angleToRotate;
-
-                for (
-                    float t = Time.deltaTime * speed;
-                    t < 1f;
-                    t += Time.deltaTime * speed
-                )
-                {
-                    transform.rotation = Quaternion.Slerp(fromRotation, toRotation, t);
-                    yield return null;
-                }
-            }
+            Gizmos.DrawSphere(_path[^1] + offset, 1f);
+            Gizmos.DrawLine(transform.position + offset, _path[^1] + offset);
+            Gizmos.color = prevColor;
         }
     }
 }

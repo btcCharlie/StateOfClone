@@ -12,11 +12,11 @@ namespace StateOfClone.Units
         public IHexCell Location { get; set; }
         public float Orientation { get; set; }
 
-        public int Speed => _data.Speed;
+        public int Speed => (int)UnitData.MaxSpeed;
 
-        public int VisionRange => _data.VisionRange;
+        public int VisionRange => UnitData.VisionRange;
 
-        [SerializeField] private UnitData _data;
+        [field: SerializeField] public UnitData UnitData { get; private set; }
 
         private Transform _body, _turret;
 
@@ -28,16 +28,13 @@ namespace StateOfClone.Units
             _body = transform.GetChild(0);
             _turret = transform.GetChild(1);
 
+            OnSelected ??= new UnityEvent();
+            OnDeselected ??= new UnityEvent();
         }
 
         private void Start()
         {
             SelectionManager.Instance.RegisterUnit(this);
-
-            if (OnSelected == null)
-                OnSelected = new UnityEvent();
-            if (OnDeselected == null)
-                OnDeselected = new UnityEvent();
         }
 
         private void OnDestroy()
