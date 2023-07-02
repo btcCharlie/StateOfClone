@@ -70,7 +70,7 @@ namespace StateOfClone.Units
             Vector3 steeringForce = Vector3.zero;
             foreach (SteeringBehavior steering in _steeringBehaviors)
             {
-                steeringForce += steering.GetSteering(target);
+                steeringForce += steering.GetSteering(target).Steering;
             }
             steeringForce /= (float)_steeringBehaviors.Length;
 

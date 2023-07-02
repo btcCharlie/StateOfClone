@@ -12,42 +12,47 @@ namespace StateOfClone.Units
         public Vector3 Steering
         {
             get { return _steering; }
-            set
-            {
-                _steering = _steeringForce = value;
-                _steeringForce.y = 0f;
-                _torque =
-                    Vector3.SignedAngle(transform.forward, _steeringForce, Vector3.up);
-
-                float speedMultiplier = 100f * _steeringForce.magnitude / _unitData.MaxSpeed;
-                Speed = Mathf.Clamp(
-                    speedMultiplier * _unitData.MaxSpeed,
-                    -_unitData.MaxSpeed, _unitData.MaxSpeed
-                    );
-
-                _steeringTorque = Vector3.up * Mathf.Clamp(
-                    _torque,
-                    -_unitData.MaxAngularAcceleration,
-                    _unitData.MaxAngularAcceleration
-                    );
-                _steeringForce =
-                    Vector3.ClampMagnitude(_steeringForce, _unitData.MaxAcceleration);
-            }
+            set { SetSteering(value); }
         }
+
+        private void SetSteering(Vector3 newSteeringDirection)
+        {
+            _steering = _steeringForce = newSteeringDirection;
+            _steeringForce.y = 0f;
+            _angleDeg =
+                Vector3.SignedAngle(transform.forward, _steeringForce, Vector3.up);
+
+            float speedMultiplier = 100f * _steeringForce.magnitude / _unitData.MaxSpeed;
+            Speed = Mathf.Clamp(
+                speedMultiplier * _unitData.MaxSpeed,
+                -_unitData.MaxSpeed, _unitData.MaxSpeed
+                );
+
+            _steeringTorque = Vector3.up * Mathf.Clamp(
+                _angleDeg,
+                -_unitData.MaxAngularAcceleration,
+                _unitData.MaxAngularAcceleration
+                );
+            _steeringForce =
+                Vector3.ClampMagnitude(_steeringForce, _unitData.MaxAcceleration);
+        }
+
         private Vector3 _steering, _steeringForce, _steeringTorque;
         private Vector3 _tangent, _normal;
 
         [SerializeField] private Transform _groundCheck;
 
         private float _activeAlignmentTolerance;
-        [SerializeField] private float _upperAlignmentTolerance = 40f; // upper threshold angle for alignment check
-        [SerializeField] private float _lowerAlignmentTolerance = 1f; // lower threshold angle for alignment check
+        // upper threshold angle for alignment check
+        [SerializeField] private float _upperAlignmentTolerance = 40f;
+        // lower threshold angle for alignment check
+        [SerializeField] private float _lowerAlignmentTolerance = 1f;
 
         public Vector3 Velocity { get; private set; }
         public Vector3 AngularVelocity { get; private set; }
         public float Speed { get; private set; }
         private float _thrust;
-        private float _torque;
+        private float _angleDeg;
 
         private Unit _unit;
         private UnitData _unitData;

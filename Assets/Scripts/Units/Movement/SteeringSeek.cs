@@ -14,14 +14,19 @@ namespace StateOfClone.Units
             _locomotion = GetComponent<Locomotion>();
         }
 
-        public override Vector3 GetSteering(Vector3 target)
+        public override SteeringParams GetSteering(Vector3 target)
         {
             _desiredVelocity = Vector3.ClampMagnitude(
                 target - _rb.position, _unit.UnitData.MaxSpeed
                 );
             _seekSteering = _desiredVelocity - _locomotion.Velocity;
 
-            return _seekSteering;
+
+            return new SteeringParams(
+                _seekSteering,
+                _desiredVelocity.normalized,
+                _seekSteering.magnitude
+            );
         }
 
         private void OnDrawGizmos()

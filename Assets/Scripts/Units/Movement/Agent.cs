@@ -23,8 +23,8 @@ namespace StateOfClone.Units
 
         public void SetSteering(SteeringParams steeringParams, float weight)
         {
-            this.steeringParams.LinearVelocity += steeringParams.LinearVelocity * weight;
-            this.steeringParams.AngularVelocity += steeringParams.AngularVelocity * weight;
+            // this.steeringParams.LinearVelocity += steeringParams.LinearVelocity * weight;
+            // this.steeringParams.AngularVelocity += steeringParams.AngularVelocity * weight;
         }
 
         protected virtual void Update()
@@ -49,8 +49,8 @@ namespace StateOfClone.Units
 
         private void LateUpdate()
         {
-            Velocity += steeringParams.LinearVelocity * Time.deltaTime;
-            Rotation += steeringParams.AngularVelocity * Time.deltaTime;
+            // Velocity += steeringParams.LinearVelocity * Time.deltaTime;
+            // Rotation += steeringParams.AngularVelocity * Time.deltaTime;
 
             // limit velocity to max speed
             if (Velocity.magnitude > TrueMaxSpeed)

@@ -14,9 +14,9 @@ namespace StateOfClone.Units
             _unit = GetComponent<Unit>();
         }
 
-        public virtual Vector3 GetSteering(Vector3 target)
+        public virtual SteeringParams GetSteering(Vector3 target)
         {
-            return Vector3.zero;
+            return new SteeringParams { };
         }
     }
 }
