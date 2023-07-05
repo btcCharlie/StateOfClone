@@ -6,84 +6,43 @@ namespace StateOfClone.Units
     [RequireComponent(typeof(Unit))]
     public class Locomotion : MonoBehaviour, IUnitAction
     {
-        /// <summary>
-        /// Local steering direction in 3D space
-        /// </summary>
-        public Vector3 Steering
-        {
-            get { return _steering; }
-            set { SetSteering(value); }
-        }
-
-        private void SetSteering(Vector3 newSteeringDirection)
-        {
-            _steering = _steeringForce = newSteeringDirection;
-            _steeringForce.y = 0f;
-            _angleDeg =
-                Vector3.SignedAngle(transform.forward, _steeringForce, Vector3.up);
-
-            float speedMultiplier = 100f * _steeringForce.magnitude / _unitData.MaxSpeed;
-            Speed = Mathf.Clamp(
-                speedMultiplier * _unitData.MaxSpeed,
-                -_unitData.MaxSpeed, _unitData.MaxSpeed
-                );
-
-            _steeringTorque = Vector3.up * Mathf.Clamp(
-                _angleDeg,
-                -_unitData.MaxAngularAcceleration,
-                _unitData.MaxAngularAcceleration
-                );
-            _steeringForce =
-                Vector3.ClampMagnitude(_steeringForce, _unitData.MaxAcceleration);
-        }
-
-        private Vector3 _steering, _steeringForce, _steeringTorque;
-        private Vector3 _tangent, _normal;
-
-        [SerializeField] private Transform _groundCheck;
-
-        private float _activeAlignmentTolerance;
-        // upper threshold angle for alignment check
-        [SerializeField] private float _upperAlignmentTolerance = 40f;
-        // lower threshold angle for alignment check
-        [SerializeField] private float _lowerAlignmentTolerance = 1f;
-
-        public Vector3 Velocity { get; private set; }
-        public Vector3 AngularVelocity { get; private set; }
-        public float Speed { get; private set; }
-        private float _thrust;
-        private float _angleDeg;
-
+        private Rigidbody _rb;
+        private LayerMask _groundLayer;
         private Unit _unit;
         private UnitData _unitData;
 
-        private Rigidbody _rigidbody;
-
-        private LayerMask _groundLayer;
-
         [SerializeField] private int _recentNormalsCount = 10;
+        [SerializeField] private float _rotationAlignmentThreshold = 50f;
         private Vector3[] _recentNormals;
+
+        // Speed at which the vehicle moves
+        public float SpeedUnitsPerSec { get; private set; } = 10f;
+        // Speed at which the vehicle turns
+        public float TurnSpeedDegreesPerSec { get; set; } = 0.1f;
+        // How far below the vehicle to look for the ground
+        public float GroundDetectionRangeUnits { get; set; } = 10f;
+        // Layer containing the ground
+        public Vector3 SteeringDirection { get; set; }
+        public Vector3 Velocity { get; private set; }
+        public Vector3 AngularVelocity { get; private set; }
 
         private void Awake()
         {
             _unit = GetComponent<Unit>();
             _unitData = _unit.UnitData;
-            _rigidbody = GetComponent<Rigidbody>();
+            _rb = GetComponent<Rigidbody>();
             _groundLayer = LayerMask.GetMask("Ground");
             _recentNormals = new Vector3[_recentNormalsCount];
-            _activeAlignmentTolerance = _lowerAlignmentTolerance;
             Velocity = Vector3.zero;
             AngularVelocity = Vector3.zero;
-            Speed = 0f;
+            // SpeedUnitsPerSec = 0f;
         }
 
         private void Start()
         {
             enabled = false;
-            if (Physics.Raycast(
-                _groundCheck.position, Vector3.down,
-                out RaycastHit hit, 10f, _groundLayer
-                ))
+            if (Physics.Raycast(transform.position, -transform.up,
+                out RaycastHit hit, GroundDetectionRangeUnits, _groundLayer))
             {
                 for (int i = 0; i < _recentNormals.Length; i++)
                 {
@@ -92,116 +51,55 @@ namespace StateOfClone.Units
             }
         }
 
+        void FixedUpdate()
+        {
+            // Cast a ray downwards to detect the ground
+            if (Physics.Raycast(transform.position, -transform.up,
+                out RaycastHit hit, GroundDetectionRangeUnits, _groundLayer))
+            {
+                // Rotate the vehicle to match the ground's normal
+                Quaternion toRotation = Quaternion.FromToRotation(
+                    transform.up, hit.normal) * _rb.rotation;
+                _rb.rotation = Quaternion.Slerp(
+                    _rb.rotation, toRotation, Time.deltaTime * TurnSpeedDegreesPerSec);
+            }
+
+            // Find the rotation that points the vehicle towards the steering direction
+            Vector3 flattenedSteeringDirection = new(
+                SteeringDirection.x, 0, SteeringDirection.z);
+            Quaternion desiredRotation = Quaternion.LookRotation(
+                flattenedSteeringDirection);
+
+            // Calculate the angle between the current and desired direction
+            float angleDiff = Quaternion.Angle(_rb.rotation, desiredRotation);
+
+            // If the angle difference is small, don't adjust the rotation
+            if (angleDiff > _rotationAlignmentThreshold)
+            {
+                // Use this to calculate a modified turn speed
+                float modifiedTurnSpeed = TurnSpeedDegreesPerSec * (angleDiff / 180f);
+
+                // Rotate the vehicle towards the desired rotation
+                _rb.rotation = Quaternion.Slerp(
+                    _rb.rotation, desiredRotation, Time.deltaTime * modifiedTurnSpeed);
+            }
+
+            // Move the vehicle forward
+            _rb.position += SpeedUnitsPerSec * Time.fixedDeltaTime * transform.forward;
+
+            Velocity = transform.forward * SpeedUnitsPerSec;
+        }
+
         private void OnDisable()
         {
             Velocity = Vector3.zero;
             AngularVelocity = Vector3.zero;
-            Speed = 0f;
-        }
-
-        private void FixedUpdate()
-        {
-            if (_steering == Vector3.zero)
-            {
-                return;
-            }
-
-            float hitGroundHeight;
-            Vector3 hitNormal;
-            if (Physics.Raycast(
-                _groundCheck.position, Vector3.down,
-                out RaycastHit hitDownwards, 10f, _groundLayer
-            ))
-            {
-                // Debug.Log("Hit downwards");
-                hitGroundHeight = hitDownwards.point.y;
-                hitNormal = hitDownwards.normal;
-            }
-            else
-            {
-                if (Physics.Raycast(
-                    _groundCheck.position - Vector3.up, Vector3.up,
-                    out RaycastHit hitUpwards, 10f, _groundLayer
-                ))
-                {
-                    // Debug.Log("Hit upwards");
-                    hitGroundHeight = hitUpwards.point.y;
-                    hitNormal = -hitUpwards.normal;
-                }
-                else
-                {
-                    //TODO: unit is somewhere 10f units above or below ground
-                    // Debug.Log("Hit nowhere");
-                    return;
-                }
-            }
-
-            PlaceSelfOnGround(hitGroundHeight);
-
-            AddNewNormal(hitNormal);
-            _normal = GetNormalMovingAverage();
-            _tangent = Vector3.Cross(-_normal, transform.right);
-            _rigidbody.rotation = Quaternion.LookRotation(_tangent, _normal);
-
-            if (!IsAlignedTowards(_steering, _activeAlignmentTolerance))
-            {
-            }
-            else
-            {
-            }
-
-            // Speed += _thrust * Time.fixedDeltaTime;
-            Speed = Mathf.Clamp(Speed, -_unitData.MaxSpeed, _unitData.MaxSpeed);
-            Velocity = transform.forward * Speed;
-            Quaternion targetRotation = Quaternion.LookRotation(_steering, _normal);
-
-            float steeringMagnitude = new Vector3(_steering.x, 0f, _steering.z).magnitude;
-
-            // Interpolate between the maximum step size and zero based on the angle
-            float step = Mathf.Lerp(
-                0f, _steeringTorque.magnitude, steeringMagnitude / 3f
-                );
-            Debug.Log($"Steering mag: {steeringMagnitude}; Step: {step}; Max step: {_steeringTorque.magnitude}");
-
-            // Rotate towards the target using the interpolated step size
-            _rigidbody.rotation = Quaternion.RotateTowards(
-                _rigidbody.rotation, targetRotation,
-                step * Time.fixedDeltaTime
-            );
-
-            _rigidbody.position +=
-                Time.fixedDeltaTime * Velocity;
-        }
-
-        private void PlaceSelfOnGround(float groundHeight)
-        {
-            _rigidbody.position =
-                new Vector3(_rigidbody.position.x, groundHeight, _rigidbody.position.z);
-        }
-
-        private bool IsAlignedTowards(Vector3 direction, float toleranceDegrees)
-        {
-            Vector3 forward = transform.forward;
-            direction.y = forward.y = 0f;
-            float angleDifference = Vector3.Angle(forward, direction);
-            // Debug.Log($"Angle distance to align: {angleDifference}");
-            // Debug.Log($"Active alignment tolerance: {toleranceDegrees}");
-
-            if (angleDifference < _lowerAlignmentTolerance)
-            {
-                _activeAlignmentTolerance = _upperAlignmentTolerance;
-            }
-            if (angleDifference > _upperAlignmentTolerance)
-            {
-                _activeAlignmentTolerance = _lowerAlignmentTolerance;
-            }
-
-            return angleDifference <= toleranceDegrees;
+            // SpeedUnitsPerSec = 0f;
         }
 
         public void StopMovement()
         {
-            Steering = Vector3.zero;
+            SteeringDirection = Vector3.zero;
         }
 
         private Vector3 GetNormalMovingAverage()
@@ -214,6 +112,11 @@ namespace StateOfClone.Units
             return sum / _recentNormals.Length;
         }
 
+        /// <summary>
+        /// Moves the moving average of normals one forward and replaces the 
+        /// last element with newNormal.
+        /// </summary>
+        /// <param name="newNormal">The new normal to add</param>
         private void AddNewNormal(Vector3 newNormal)
         {
             for (int i = 0; i < _recentNormals.Length - 1; i++)

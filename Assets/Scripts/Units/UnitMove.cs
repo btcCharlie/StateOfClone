@@ -74,7 +74,7 @@ namespace StateOfClone.Units
             }
             steeringForce /= (float)_steeringBehaviors.Length;
 
-            _locomotion.Steering = steeringForce;
+            _locomotion.SteeringDirection = steeringForce;
         }
 
         private void DisableIfDeselected()
