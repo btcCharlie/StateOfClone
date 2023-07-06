@@ -6,6 +6,8 @@ namespace StateOfClone.Units
     [RequireComponent(typeof(Unit))]
     public class Locomotion : MonoBehaviour, IUnitAction
     {
+        public SteeringParams SteeringParams { get; set; }
+
         private Rigidbody _rb;
         private LayerMask _groundLayer;
         private Unit _unit;
@@ -26,6 +28,20 @@ namespace StateOfClone.Units
         public Vector3 Velocity { get; private set; }
         public Vector3 AngularVelocity { get; private set; }
 
+        // public struct SteeringParams
+        // {
+        //     public Vector2 Turning { get; set; }
+        //     public float Thrust { get; set; }
+
+        //     public SteeringParams(Vector2 turning, float thrust)
+        //     {
+        //         Turning = turning;
+        //         Thrust = thrust;
+        //     }
+
+        //     public static SteeringParams Zero => new(Vector2.zero, 0f);
+        // }
+
         private void Awake()
         {
             _unit = GetComponent<Unit>();
@@ -35,7 +51,6 @@ namespace StateOfClone.Units
             _recentNormals = new Vector3[_recentNormalsCount];
             Velocity = Vector3.zero;
             AngularVelocity = Vector3.zero;
-            // SpeedUnitsPerSec = 0f;
         }
 
         private void Start()
@@ -51,43 +66,47 @@ namespace StateOfClone.Units
             }
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
-            // Cast a ray downwards to detect the ground
-            if (Physics.Raycast(transform.position, -transform.up,
-                out RaycastHit hit, GroundDetectionRangeUnits, _groundLayer))
+            Vector3 turn = Quaternion.Euler(
+                0, _unitData.MaxTurnRate * SteeringParams.Yaw * Time.fixedDeltaTime, 0
+                ) * _rb.transform.forward;
+            Vector3 desiredVelocity = Mathf.Clamp(
+                SteeringParams.Thrust, -_unitData.MaxSpeed, _unitData.MaxSpeed
+                ) * turn.normalized;
+
+            Velocity = desiredVelocity;
+
+            Vector3 nextPosition = _rb.position + desiredVelocity * Time.fixedDeltaTime;
+
+            // Get normal of the terrain at the next position
+            Vector3 normal;
+            if (Physics.Raycast(
+                nextPosition + Vector3.up, Vector3.down, out RaycastHit hit
+                ))
             {
-                // Rotate the vehicle to match the ground's normal
-                Quaternion toRotation = Quaternion.FromToRotation(
-                    transform.up, hit.normal) * _rb.rotation;
-                _rb.rotation = Quaternion.Slerp(
-                    _rb.rotation, toRotation, Time.deltaTime * TurnSpeedDegreesPerSec);
+                normal = hit.normal;
+            }
+            else
+            {
+                normal = Vector3.up;
             }
 
-            // Find the rotation that points the vehicle towards the steering direction
-            Vector3 flattenedSteeringDirection = new(
-                SteeringDirection.x, 0, SteeringDirection.z);
-            Quaternion desiredRotation = Quaternion.LookRotation(
-                flattenedSteeringDirection);
+            // Project the desired direction onto the horizontal plane
+            Vector3 horizontalDesiredDirection = Vector3.ProjectOnPlane(
+                desiredVelocity, normal
+                );
 
-            // Calculate the angle between the current and desired direction
-            float angleDiff = Quaternion.Angle(_rb.rotation, desiredRotation);
+            // Calculate the rotation to orient towards the desired direction
+            Quaternion toTarget = Quaternion.LookRotation(
+                horizontalDesiredDirection, normal
+                );
 
-            // If the angle difference is small, don't adjust the rotation
-            if (angleDiff > _rotationAlignmentThreshold)
-            {
-                // Use this to calculate a modified turn speed
-                float modifiedTurnSpeed = TurnSpeedDegreesPerSec * (angleDiff / 180f);
-
-                // Rotate the vehicle towards the desired rotation
-                _rb.rotation = Quaternion.Slerp(
-                    _rb.rotation, desiredRotation, Time.deltaTime * modifiedTurnSpeed);
-            }
-
-            // Move the vehicle forward
-            _rb.position += SpeedUnitsPerSec * Time.fixedDeltaTime * transform.forward;
-
-            Velocity = transform.forward * SpeedUnitsPerSec;
+            // Update position and rotation
+            _rb.MovePosition(nextPosition);
+            Quaternion rotation = Quaternion.Slerp(_rb.rotation, toTarget,
+                            _unitData.MaxTurnRate * Time.fixedDeltaTime);
+            _rb.MoveRotation(rotation);
         }
 
         private void OnDisable()
