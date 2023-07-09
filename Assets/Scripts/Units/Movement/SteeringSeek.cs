@@ -15,9 +15,6 @@ namespace StateOfClone.Units
 
             Vector3 currentVelocity = transform.forward * _locomotion.CurrentSpeed;
 
-            // Calculate the steering force
-            Vector3 steeringForce = desiredVelocity - currentVelocity;
-
             _yaw = CalculateYaw(desiredVelocity, currentVelocity);
             _pitch = CalculatePitch(desiredVelocity, currentVelocity);
             _speed = CalculateSpeed(desiredVelocity, currentVelocity);
@@ -44,13 +41,13 @@ namespace StateOfClone.Units
             return angleDifferenceDegrees / yawMaxTurnRateDegrees;
         }
 
-        protected override float CalculatePitch(Vector3 steeringForce, Vector3 currentSpeed)
+        protected override float CalculatePitch(Vector3 desiredVelocity, Vector3 currentSpeed)
         {
             // For now, we're not considering pitch, so return 0
             return 0f;
         }
 
-        protected override float CalculateSpeed(Vector3 steeringForce, Vector3 currentSpeed)
+        protected override float CalculateSpeed(Vector3 desiredVelocity, Vector3 currentSpeed)
         {
             // For the Seek behavior, the speed should always be the maximum speed
             return _unit.UnitData.MaxSpeed;
