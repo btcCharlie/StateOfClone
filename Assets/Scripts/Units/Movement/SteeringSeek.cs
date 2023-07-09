@@ -4,56 +4,57 @@ namespace StateOfClone.Units
 {
     public class SteeringSeek : SteeringBehavior
     {
-        private Vector3 _desiredVelocity, _seekSteering;
-        private float _yaw, _pitch, _thrust;
-
-        private Locomotion _locomotion;
-
-        protected override void Awake()
-        {
-            base.Awake();
-            _locomotion = GetComponent<Locomotion>();
-        }
+        private float _yaw, _pitch, _speed;
 
         public override SteeringParams GetSteering(Vector3 target)
         {
-            _desiredVelocity = Vector3.ClampMagnitude(
-                target - _rb.position, _unit.UnitData.MaxSpeed
+            // Calculate the desired velocity
+            Vector3 desiredVelocity =
+                (target - _rb.position).normalized * _unit.UnitData.MaxSpeed;
+
+            Vector3 currentVelocity = transform.forward * _locomotion.CurrentSpeed;
+
+            // Calculate the steering force
+            Vector3 steeringForce = desiredVelocity - currentVelocity;
+
+            _yaw = CalculateYaw(steeringForce, currentVelocity);
+            _pitch = CalculatePitch(steeringForce, currentVelocity);
+            _speed = CalculateSpeed(steeringForce, currentVelocity);
+
+            // Create and return the SteeringParams
+            return new SteeringParams(_yaw, _pitch, _speed);
+        }
+
+        protected override float CalculateYaw(Vector3 steeringForce, Vector3 currentSpeed)
+        {
+            // Calculate the angle difference between the current and 
+            // desired velocity along the world horizontal plane
+            Vector3 currentDirection = new(currentSpeed.x, 0, currentSpeed.z);
+            Vector3 desiredDirection = new(steeringForce.x, 0, steeringForce.z);
+            float angleDifference = Vector3.SignedAngle(
+                currentDirection, desiredDirection, Vector3.up
                 );
-            _seekSteering = _desiredVelocity - _locomotion.Velocity;
 
-            //TODO: correct calculation of yaw and roll - perhaps limit to just 
-            //TODO: yaw for now, beware of when unit moves directly away
+            if (Mathf.Abs(angleDifference) >= _rotationAlignmentThreshold)
+            {
+                return angleDifference / 90f;
+            }
+            else
+            {
+                return 0f;
+            }
+        }
 
-            _yaw = _desiredVelocity.x - _locomotion.Velocity.x;
-            _pitch = _desiredVelocity.z - _locomotion.Velocity.z;
-            // _turning = new(
-            //     _locomotion.Velocity.x - _desiredVelocity.x,
-            //     _locomotion.Velocity.z - _desiredVelocity.z
-            // );
-            _thrust = _unit.UnitData.MaxSpeed;
+        protected override float CalculatePitch(Vector3 steeringForce, Vector3 currentSpeed)
+        {
+            // For now, we're not considering pitch, so return 0
+            return 0f;
+        }
 
-            // Get the vector to the target
-            Vector3 toTarget = target - _rb.position;
-
-            // Yaw is the angle to turn horizontally.
-            // We'll use the vehicle's current up vector as the axis for this rotation.
-            // The angle is given by the arctangent of the ratio of X to Z distances.
-            _yaw = Mathf.Atan2(toTarget.x, toTarget.z) * Mathf.Rad2Deg;
-
-            // Pitch is the angle to turn vertically.
-            // We'll use the vehicle's current right vector as the axis for this rotation.
-            // The angle is given by the arctangent of the ratio of Y to the horizontal distance.
-            float horizontalDistance = new Vector2(toTarget.x, toTarget.z).magnitude;
-            _pitch = Mathf.Atan2(-toTarget.y, horizontalDistance) * Mathf.Rad2Deg;
-
-            // The thrust is based on the distance to the target. 
-            // If the vehicle is far away, it will thrust at maximum speed. 
-            // If it's close, it will reduce thrust proportionally to distance, but will never stop completely.
-            _thrust = Mathf.Max(toTarget.magnitude / _unit.UnitData.MaxSpeed, 0.1f);
-
-
-            return new SteeringParams(_yaw, _pitch, _thrust);
+        protected override float CalculateSpeed(Vector3 steeringForce, Vector3 currentSpeed)
+        {
+            // For the Seek behavior, the speed should always be the maximum speed
+            return _unit.UnitData.MaxSpeed;
         }
 
         private void OnDrawGizmos()
@@ -66,7 +67,7 @@ namespace StateOfClone.Units
             Vector3 offset = Vector3.up * 3f;
             Vector3 transformPosition = transform.position + offset;
             Gizmos.color = Color.grey;
-            Vector3 thrustPoint = transformPosition + transform.forward * _thrust;
+            Vector3 thrustPoint = transformPosition + transform.forward * _speed;
             Gizmos.DrawLine(transformPosition, thrustPoint);
             // Gizmos.color = Color.green;
             // Gizmos.DrawLine(from, from + _locomotion.Velocity * 10f);
@@ -75,7 +76,7 @@ namespace StateOfClone.Units
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(
                 thrustPoint,
-                thrustPoint + transform.right * _yaw
+                thrustPoint + _unit.UnitData.MaxSpeed * _yaw * transform.right
             );
             Gizmos.color = Color.black;
             Gizmos.DrawLine(

@@ -3,20 +3,26 @@ using UnityEngine;
 namespace StateOfClone.Units
 {
     [RequireComponent(typeof(Unit), typeof(Rigidbody))]
-    public class SteeringBehavior : MonoBehaviour
+    public abstract class SteeringBehavior : MonoBehaviour
     {
         protected Rigidbody _rb;
         protected Unit _unit;
+        protected Locomotion _locomotion;
+        [SerializeField] protected float _rotationAlignmentThreshold = 50f;
 
         protected virtual void Awake()
         {
             _rb = GetComponent<Rigidbody>();
             _unit = GetComponent<Unit>();
+            _locomotion = GetComponent<Locomotion>();
         }
 
-        public virtual SteeringParams GetSteering(Vector3 target)
-        {
-            return new SteeringParams { };
-        }
+        public abstract SteeringParams GetSteering(Vector3 target);
+
+        protected abstract float CalculateYaw(Vector3 steeringForce, Vector3 currentSpeed);
+
+        protected abstract float CalculatePitch(Vector3 steeringForce, Vector3 currentSpeed);
+
+        protected abstract float CalculateSpeed(Vector3 steeringForce, Vector3 currentSpeed);
     }
 }

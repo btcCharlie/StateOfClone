@@ -4,45 +4,27 @@ using StateOfClone.Core;
 namespace StateOfClone.Units
 {
     [RequireComponent(typeof(Unit))]
-    public class Locomotion : MonoBehaviour, IUnitAction
+    public abstract class Locomotion : MonoBehaviour, IUnitAction
     {
         public SteeringParams SteeringParams { get; set; }
 
-        private Rigidbody _rb;
-        private LayerMask _groundLayer;
-        private Unit _unit;
-        private UnitData _unitData;
+        protected Rigidbody _rb;
+        protected LayerMask _groundLayer;
+        protected Unit _unit;
+        protected UnitData _unitData;
 
-        [SerializeField] private int _recentNormalsCount = 10;
-        [SerializeField] private float _rotationAlignmentThreshold = 50f;
-        private Vector3[] _recentNormals;
+        [SerializeField] protected int _recentNormalsCount = 10;
+        [SerializeField] protected float _rotationAlignmentThreshold = 50f;
+        protected Vector3[] _recentNormals;
+        protected float _groundDetectionRangeUnits = 10f;
 
-        // Speed at which the vehicle moves
-        public float SpeedUnitsPerSec { get; private set; } = 10f;
-        // Speed at which the vehicle turns
-        public float TurnSpeedDegreesPerSec { get; set; } = 0.1f;
-        // How far below the vehicle to look for the ground
-        public float GroundDetectionRangeUnits { get; set; } = 10f;
         // Layer containing the ground
         public Vector3 SteeringDirection { get; set; }
-        public Vector3 Velocity { get; private set; }
-        public Vector3 AngularVelocity { get; private set; }
+        public Vector3 Velocity { get; protected set; }
+        public float CurrentSpeed { get; protected set; }
+        public Vector3 AngularVelocity { get; protected set; }
 
-        // public struct SteeringParams
-        // {
-        //     public Vector2 Turning { get; set; }
-        //     public float Thrust { get; set; }
-
-        //     public SteeringParams(Vector2 turning, float thrust)
-        //     {
-        //         Turning = turning;
-        //         Thrust = thrust;
-        //     }
-
-        //     public static SteeringParams Zero => new(Vector2.zero, 0f);
-        // }
-
-        private void Awake()
+        protected virtual void Awake()
         {
             _unit = GetComponent<Unit>();
             _unitData = _unit.UnitData;
@@ -50,14 +32,15 @@ namespace StateOfClone.Units
             _groundLayer = LayerMask.GetMask("Ground");
             _recentNormals = new Vector3[_recentNormalsCount];
             Velocity = Vector3.zero;
+            CurrentSpeed = 0f;
             AngularVelocity = Vector3.zero;
         }
 
-        private void Start()
+        protected virtual void Start()
         {
             enabled = false;
             if (Physics.Raycast(transform.position, -transform.up,
-                out RaycastHit hit, GroundDetectionRangeUnits, _groundLayer))
+                out RaycastHit hit, _groundDetectionRangeUnits, _groundLayer))
             {
                 for (int i = 0; i < _recentNormals.Length; i++)
                 {
@@ -66,62 +49,61 @@ namespace StateOfClone.Units
             }
         }
 
-        private void FixedUpdate()
-        {
-            Vector3 turn = Quaternion.Euler(
-                0, _unitData.MaxTurnRate * SteeringParams.Yaw * Time.fixedDeltaTime, 0
-                ) * _rb.transform.forward;
-            Vector3 desiredVelocity = Mathf.Clamp(
-                SteeringParams.Speed, -_unitData.MaxSpeed, _unitData.MaxSpeed
-                ) * turn.normalized;
+        protected abstract void FixedUpdate();
+        // {
+        //     Vector3 turn = Quaternion.Euler(
+        //         0, _unitData.MaxTurnRate * SteeringParams.Yaw * Time.fixedDeltaTime, 0
+        //         ) * _rb.transform.forward;
+        //     Vector3 desiredVelocity = Mathf.Clamp(
+        //         SteeringParams.Speed, -_unitData.MaxSpeed, _unitData.MaxSpeed
+        //         ) * turn.normalized;
 
-            Velocity = desiredVelocity;
+        //     Velocity = desiredVelocity;
 
-            Vector3 nextPosition = _rb.position + desiredVelocity * Time.fixedDeltaTime;
+        //     Vector3 nextPosition = _rb.position + desiredVelocity * Time.fixedDeltaTime;
 
-            // Get normal of the terrain at the next position
-            Vector3 normal;
-            if (Physics.Raycast(
-                nextPosition + Vector3.up, Vector3.down, out RaycastHit hit
-                ))
-            {
-                normal = hit.normal;
-            }
-            else
-            {
-                normal = Vector3.up;
-            }
+        //     // Get normal of the terrain at the next position
+        //     Vector3 normal;
+        //     if (Physics.Raycast(
+        //         nextPosition + Vector3.up, Vector3.down, out RaycastHit hit
+        //         ))
+        //     {
+        //         normal = hit.normal;
+        //     }
+        //     else
+        //     {
+        //         normal = Vector3.up;
+        //     }
 
-            // Project the desired direction onto the horizontal plane
-            Vector3 horizontalDesiredDirection = Vector3.ProjectOnPlane(
-                desiredVelocity, normal
-                );
+        //     // Project the desired direction onto the horizontal plane
+        //     Vector3 horizontalDesiredDirection = Vector3.ProjectOnPlane(
+        //         desiredVelocity, normal
+        //         );
 
-            // Calculate the rotation to orient towards the desired direction
-            Quaternion toTarget = Quaternion.LookRotation(
-                horizontalDesiredDirection, normal
-                );
+        //     // Calculate the rotation to orient towards the desired direction
+        //     Quaternion toTarget = Quaternion.LookRotation(
+        //         horizontalDesiredDirection, normal
+        //         );
 
-            // Update position and rotation
-            _rb.MovePosition(nextPosition);
-            Quaternion rotation = Quaternion.Slerp(_rb.rotation, toTarget,
-                            _unitData.MaxTurnRate * Time.fixedDeltaTime);
-            _rb.MoveRotation(rotation);
-        }
+        //     // Update position and rotation
+        //     _rb.MovePosition(nextPosition);
+        //     Quaternion rotation = Quaternion.Slerp(_rb.rotation, toTarget,
+        //                     _unitData.MaxTurnRate * Time.fixedDeltaTime);
+        //     _rb.MoveRotation(rotation);
+        // }
 
-        private void OnDisable()
+        protected virtual void OnDisable()
         {
             Velocity = Vector3.zero;
             AngularVelocity = Vector3.zero;
-            // SpeedUnitsPerSec = 0f;
         }
 
-        public void StopMovement()
+        public virtual void StopMovement()
         {
             SteeringDirection = Vector3.zero;
         }
 
-        private Vector3 GetNormalMovingAverage()
+        protected Vector3 GetNormalMovingAverage()
         {
             Vector3 sum = Vector3.zero;
             for (int i = 0; i < _recentNormals.Length; i++)
@@ -136,7 +118,7 @@ namespace StateOfClone.Units
         /// last element with newNormal.
         /// </summary>
         /// <param name="newNormal">The new normal to add</param>
-        private void AddNewNormal(Vector3 newNormal)
+        protected void AddNewNormal(Vector3 newNormal)
         {
             for (int i = 0; i < _recentNormals.Length - 1; i++)
             {
@@ -145,7 +127,7 @@ namespace StateOfClone.Units
             _recentNormals[^1] = newNormal;
         }
 
-        private void OnDrawGizmos()
+        protected virtual void OnDrawGizmos()
         {
             Vector3 from = transform.position + Vector3.up * 3f;
             Color ogColor = Gizmos.color;

@@ -941,8 +941,8 @@ GameObject:
   - component: {fileID: 9056106201279526766}
   - component: {fileID: 3981381912372622207}
   - component: {fileID: 2286391981109288628}
-  - component: {fileID: 5993809603014673722}
   - component: {fileID: 2869909619939201830}
+  - component: {fileID: 8601995091811367684}
   m_Layer: 8
   m_Name: Unit Tank
   m_TagString: Untagged
@@ -1014,21 +1014,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &5993809603014673722
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7976790011760261007}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6471c2ea2d088e340a043038082750a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _groundCheck: {fileID: 8748190028812341977}
-  _alignmentToleranceDegrees: 3
-  _recentNormalsCount: 20
 --- !u!114 &2869909619939201830
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1041,6 +1026,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 342afa3769b356f459237404a669e724, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rotationAlignmentThreshold: 50
+--- !u!114 &8601995091811367684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7976790011760261007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c50909a66381f245a2407e761ff24ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _recentNormalsCount: 10
+  _rotationAlignmentThreshold: 50
 --- !u!1 &8113065935367883352
 GameObject:
   m_ObjectHideFlags: 0
