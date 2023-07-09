@@ -28,8 +28,9 @@ namespace StateOfClone.Units
                 ))
             {
                 newPosition.y = hit.point.y;
+                AddNewNormal(hit.normal);
                 newRotation = Quaternion.FromToRotation(
-                    transform.up, hit.normal
+                    transform.up, GetNormalMovingAverage()
                     ) * newRotation;
             }
             else if (Physics.Raycast(
@@ -38,8 +39,9 @@ namespace StateOfClone.Units
                 ))
             {
                 newPosition.y = hit.point.y;
+                AddNewNormal(hit.normal);
                 newRotation = Quaternion.FromToRotation(
-                    transform.up, hit.normal
+                    transform.up, GetNormalMovingAverage()
                     ) * newRotation;
             }
 
