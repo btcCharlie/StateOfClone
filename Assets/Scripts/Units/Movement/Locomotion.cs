@@ -72,7 +72,7 @@ namespace StateOfClone.Units
                 0, _unitData.MaxTurnRate * SteeringParams.Yaw * Time.fixedDeltaTime, 0
                 ) * _rb.transform.forward;
             Vector3 desiredVelocity = Mathf.Clamp(
-                SteeringParams.Thrust, -_unitData.MaxSpeed, _unitData.MaxSpeed
+                SteeringParams.Speed, -_unitData.MaxSpeed, _unitData.MaxSpeed
                 ) * turn.normalized;
 
             Velocity = desiredVelocity;

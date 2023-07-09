@@ -6,20 +6,20 @@ namespace StateOfClone.Units
     {
         public float Yaw { get; set; }
         public float Pitch { get; set; }
-        public float Thrust { get; set; }
+        public float Speed { get; set; }
 
-        public SteeringParams(float yaw, float thrust)
+        public SteeringParams(float yaw, float speed)
         {
             Yaw = yaw;
             Pitch = 0f;
-            Thrust = thrust;
+            Speed = speed;
         }
 
-        public SteeringParams(float yaw, float pitch, float thrust)
+        public SteeringParams(float yaw, float pitch, float speed)
         {
             Yaw = yaw;
             Pitch = pitch;
-            Thrust = thrust;
+            Speed = speed;
         }
 
         public static SteeringParams Zero => new(0f, 0f, 0f);
@@ -30,7 +30,7 @@ namespace StateOfClone.Units
         public static SteeringParams operator +(SteeringParams a, SteeringParams b)
         {
             return new SteeringParams(
-                a.Yaw + b.Yaw, a.Pitch + b.Pitch, a.Thrust + b.Thrust
+                a.Yaw + b.Yaw, a.Pitch + b.Pitch, a.Speed + b.Speed
                 );
         }
 
@@ -40,7 +40,7 @@ namespace StateOfClone.Units
         public static SteeringParams operator /(SteeringParams a, float value)
         {
             return new SteeringParams(
-                a.Yaw / value, a.Pitch / value, a.Thrust / value
+                a.Yaw / value, a.Pitch / value, a.Speed / value
                 );
         }
     }
