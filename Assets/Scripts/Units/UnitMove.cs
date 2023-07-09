@@ -67,14 +67,14 @@ namespace StateOfClone.Units
                 return;
             }
 
-            Vector3 steeringForce = Vector3.zero;
+            SteeringParams steeringParams = SteeringParams.Zero;
             foreach (SteeringBehavior steering in _steeringBehaviors)
             {
-                steeringForce += steering.GetSteering(target).Steering;
+                steeringParams += steering.GetSteering(target);
             }
-            steeringForce /= (float)_steeringBehaviors.Length;
+            steeringParams /= (float)_steeringBehaviors.Length;
 
-            _locomotion.Steering = steeringForce;
+            _locomotion.SteeringParams = steeringParams;
         }
 
         private void DisableIfDeselected()
