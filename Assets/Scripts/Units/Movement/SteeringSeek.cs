@@ -33,6 +33,26 @@ namespace StateOfClone.Units
             // );
             _thrust = _unit.UnitData.MaxSpeed;
 
+            // Get the vector to the target
+            Vector3 toTarget = target - _rb.position;
+
+            // Yaw is the angle to turn horizontally.
+            // We'll use the vehicle's current up vector as the axis for this rotation.
+            // The angle is given by the arctangent of the ratio of X to Z distances.
+            _yaw = Mathf.Atan2(toTarget.x, toTarget.z) * Mathf.Rad2Deg;
+
+            // Pitch is the angle to turn vertically.
+            // We'll use the vehicle's current right vector as the axis for this rotation.
+            // The angle is given by the arctangent of the ratio of Y to the horizontal distance.
+            float horizontalDistance = new Vector2(toTarget.x, toTarget.z).magnitude;
+            _pitch = Mathf.Atan2(-toTarget.y, horizontalDistance) * Mathf.Rad2Deg;
+
+            // The thrust is based on the distance to the target. 
+            // If the vehicle is far away, it will thrust at maximum speed. 
+            // If it's close, it will reduce thrust proportionally to distance, but will never stop completely.
+            _thrust = Mathf.Max(toTarget.magnitude / _unit.UnitData.MaxSpeed, 0.1f);
+
+
             return new SteeringParams(_yaw, _pitch, _thrust);
         }
 
@@ -55,7 +75,7 @@ namespace StateOfClone.Units
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(
                 thrustPoint,
-                thrustPoint + -transform.right * _yaw
+                thrustPoint + transform.right * _yaw
             );
             Gizmos.color = Color.black;
             Gizmos.DrawLine(
