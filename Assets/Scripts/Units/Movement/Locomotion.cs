@@ -13,10 +13,10 @@ namespace StateOfClone.Units
         protected Unit _unit;
         protected UnitData _unitData;
 
+        [SerializeField] protected float _groundDetectionRange = 10f;
+        [SerializeField] protected float _rotationAlignmentThreshold = 5f;
         [SerializeField] protected int _recentNormalsCount = 10;
-        [SerializeField] protected float _rotationAlignmentThreshold = 50f;
         protected Vector3[] _recentNormals;
-        protected float _groundDetectionRangeUnits = 10f;
 
         // Layer containing the ground
         public Vector3 SteeringDirection { get; set; }
@@ -40,7 +40,7 @@ namespace StateOfClone.Units
         {
             enabled = false;
             if (Physics.Raycast(transform.position, -transform.up,
-                out RaycastHit hit, _groundDetectionRangeUnits, _groundLayer))
+                out RaycastHit hit, _groundDetectionRange, _groundLayer))
             {
                 for (int i = 0; i < _recentNormals.Length; i++)
                 {
@@ -50,47 +50,6 @@ namespace StateOfClone.Units
         }
 
         protected abstract void FixedUpdate();
-        // {
-        //     Vector3 turn = Quaternion.Euler(
-        //         0, _unitData.MaxTurnRate * SteeringParams.Yaw * Time.fixedDeltaTime, 0
-        //         ) * _rb.transform.forward;
-        //     Vector3 desiredVelocity = Mathf.Clamp(
-        //         SteeringParams.Speed, -_unitData.MaxSpeed, _unitData.MaxSpeed
-        //         ) * turn.normalized;
-
-        //     Velocity = desiredVelocity;
-
-        //     Vector3 nextPosition = _rb.position + desiredVelocity * Time.fixedDeltaTime;
-
-        //     // Get normal of the terrain at the next position
-        //     Vector3 normal;
-        //     if (Physics.Raycast(
-        //         nextPosition + Vector3.up, Vector3.down, out RaycastHit hit
-        //         ))
-        //     {
-        //         normal = hit.normal;
-        //     }
-        //     else
-        //     {
-        //         normal = Vector3.up;
-        //     }
-
-        //     // Project the desired direction onto the horizontal plane
-        //     Vector3 horizontalDesiredDirection = Vector3.ProjectOnPlane(
-        //         desiredVelocity, normal
-        //         );
-
-        //     // Calculate the rotation to orient towards the desired direction
-        //     Quaternion toTarget = Quaternion.LookRotation(
-        //         horizontalDesiredDirection, normal
-        //         );
-
-        //     // Update position and rotation
-        //     _rb.MovePosition(nextPosition);
-        //     Quaternion rotation = Quaternion.Slerp(_rb.rotation, toTarget,
-        //                     _unitData.MaxTurnRate * Time.fixedDeltaTime);
-        //     _rb.MoveRotation(rotation);
-        // }
 
         protected virtual void OnDisable()
         {

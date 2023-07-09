@@ -8,7 +8,6 @@ namespace StateOfClone.Units
         protected Rigidbody _rb;
         protected Unit _unit;
         protected Locomotion _locomotion;
-        [SerializeField] protected float _rotationAlignmentThreshold = 50f;
 
         protected virtual void Awake()
         {

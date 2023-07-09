@@ -1026,7 +1026,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 342afa3769b356f459237404a669e724, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rotationAlignmentThreshold: 50
+  _alignmentThresholdDegrees: 2
+  yawMaxTurnRateDegrees: 10
 --- !u!114 &8601995091811367684
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1039,8 +1040,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c50909a66381f245a2407e761ff24ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _recentNormalsCount: 10
-  _rotationAlignmentThreshold: 50
+  _groundDetectionRange: 10
+  _rotationAlignmentThreshold: 0.1
+  _recentNormalsCount: 30
 --- !u!1 &8113065935367883352
 GameObject:
   m_ObjectHideFlags: 0
