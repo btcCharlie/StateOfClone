@@ -15,7 +15,8 @@ MonoBehaviour:
   MaxAcceleration: 10
   MaxSpeed: 20
   MaxAngularAcceleration: 60
-  MaxTurnRate: 40
+  MaxTurnRate: 60
   VisionRange: 10
   Health: 0
+  IsAirborne: 0
   FrictionCoefficient: 0.1

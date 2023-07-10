@@ -17,9 +17,6 @@ namespace StateOfClone.Units
         [SerializeField] protected int _recentNormalsCount = 20;
         protected Vector3[] _recentNormals;
 
-        // Layer containing the ground
-        public Vector3 SteeringDirection { get; set; }
-        public Vector3 Velocity { get; protected set; }
         public float CurrentSpeedUnitPerSec { get; protected set; }
         public float CurrentAngularSpeedDegPerSec { get; protected set; }
 
@@ -30,7 +27,6 @@ namespace StateOfClone.Units
             _rb = GetComponent<Rigidbody>();
             _groundLayer = LayerMask.GetMask("Ground");
             _recentNormals = new Vector3[_recentNormalsCount];
-            Velocity = Vector3.zero;
             CurrentSpeedUnitPerSec = 0f;
             CurrentAngularSpeedDegPerSec = 0f;
         }
@@ -51,18 +47,44 @@ namespace StateOfClone.Units
             }
         }
 
-        protected abstract void FixedUpdate();
+        protected virtual void FixedUpdate()
+        {
+            UpdateSpeeds();
+
+            Vector3 newPosition =
+                _rb.position +
+                CurrentSpeedUnitPerSec * Time.fixedDeltaTime * transform.forward;
+
+            Quaternion newRotation = Quaternion.Euler(
+                0f, CurrentAngularSpeedDegPerSec * Time.fixedDeltaTime, 0f
+                ) * _rb.rotation;
+
+            // Make sure the vehicle sits flush on the ground
+            if (Physics.Raycast(
+                newPosition + (Vector3.up * _groundDetectionRange), Vector3.down,
+                out RaycastHit hit, 2 * _groundDetectionRange, _groundLayer
+                ))
+            {
+                UpdateElevationAndNormal(ref newPosition, ref newRotation, hit);
+            }
+
+            ApplySteering(newPosition, newRotation);
+        }
+
+        protected abstract void ApplySteering(
+            Vector3 newPosition, Quaternion newRotation
+            );
 
         protected virtual void OnDisable()
         {
-            Velocity = Vector3.zero;
-            CurrentSpeedUnitPerSec = 0f;
-            CurrentAngularSpeedDegPerSec = 0f;
+            StopMovement();
         }
 
         public virtual void StopMovement()
         {
-            SteeringDirection = Vector3.zero;
+            CurrentSpeedUnitPerSec = 0f;
+            CurrentAngularSpeedDegPerSec = 0f;
+            SteeringParams = SteeringParams.Zero;
         }
 
         protected Vector3 GetNormalMovingAverage()
@@ -87,6 +109,37 @@ namespace StateOfClone.Units
                 _recentNormals[i] = _recentNormals[i + 1];
             }
             _recentNormals[^1] = newNormal;
+        }
+
+        protected virtual void UpdateElevationAndNormal(
+            ref Vector3 newPosition, ref Quaternion newRotation, RaycastHit hit
+            )
+        {
+            if (_unitData.IsAirborne)
+            {
+                newPosition.y = hit.point.y + 15f;
+            }
+            else
+            {
+                newPosition.y = hit.point.y;
+                AddNewNormal(hit.normal);
+                newRotation = Quaternion.FromToRotation(
+                    transform.up, GetNormalMovingAverage()
+                    ) * newRotation;
+            }
+        }
+
+        protected virtual void UpdateSpeeds()
+        {
+            // Calculate the new position and rotation
+            CurrentSpeedUnitPerSec = Mathf.Clamp(
+                SteeringParams.Speed, -_unitData.MaxSpeed, _unitData.MaxSpeed
+                );
+            CurrentAngularSpeedDegPerSec = Mathf.Clamp(
+                SteeringParams.Yaw * _unitData.MaxTurnRate,
+                 -_unitData.MaxTurnRate,
+                 _unitData.MaxTurnRate
+                );
         }
 
         protected virtual void OnDrawGizmos()
