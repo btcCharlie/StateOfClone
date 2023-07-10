@@ -14,15 +14,14 @@ namespace StateOfClone.Units
         protected UnitData _unitData;
 
         [SerializeField] protected float _groundDetectionRange = 10f;
-        [SerializeField] protected float _rotationAlignmentThreshold = 5f;
-        [SerializeField] protected int _recentNormalsCount = 10;
+        [SerializeField] protected int _recentNormalsCount = 20;
         protected Vector3[] _recentNormals;
 
         // Layer containing the ground
         public Vector3 SteeringDirection { get; set; }
         public Vector3 Velocity { get; protected set; }
-        public float CurrentSpeed { get; protected set; }
-        public Vector3 AngularVelocity { get; protected set; }
+        public float CurrentSpeedUnitPerSec { get; protected set; }
+        public float CurrentAngularSpeedDegPerSec { get; protected set; }
 
         protected virtual void Awake()
         {
@@ -32,20 +31,23 @@ namespace StateOfClone.Units
             _groundLayer = LayerMask.GetMask("Ground");
             _recentNormals = new Vector3[_recentNormalsCount];
             Velocity = Vector3.zero;
-            CurrentSpeed = 0f;
-            AngularVelocity = Vector3.zero;
+            CurrentSpeedUnitPerSec = 0f;
+            CurrentAngularSpeedDegPerSec = 0f;
         }
 
         protected virtual void Start()
         {
             enabled = false;
-            if (Physics.Raycast(transform.position, -transform.up,
+            if (Physics.Raycast(transform.position - Vector3.up, -Vector3.up,
                 out RaycastHit hit, _groundDetectionRange, _groundLayer))
             {
                 for (int i = 0; i < _recentNormals.Length; i++)
                 {
                     _recentNormals[i] = hit.normal;
                 }
+                _rb.rotation = Quaternion.FromToRotation(
+                    transform.up, hit.normal
+                    ) * _rb.rotation;
             }
         }
 
@@ -54,7 +56,8 @@ namespace StateOfClone.Units
         protected virtual void OnDisable()
         {
             Velocity = Vector3.zero;
-            AngularVelocity = Vector3.zero;
+            CurrentSpeedUnitPerSec = 0f;
+            CurrentAngularSpeedDegPerSec = 0f;
         }
 
         public virtual void StopMovement()
@@ -90,22 +93,11 @@ namespace StateOfClone.Units
         {
             Vector3 from = transform.position + Vector3.up * 3f;
             Color ogColor = Gizmos.color;
-            // Gizmos.color = Color.red;
-            // Gizmos.DrawLine(from, from + _steeringForce);
-            // Gizmos.color = Color.blue;
-            // Vector3 perpForce = Vector3.Cross(_steeringForce, Vector3.up);
-            // Gizmos.DrawLine(
-            //     from + _steeringForce,
-            //     from + _steeringForce +
-            //     perpForce.normalized * _steeringTorque.magnitude
-            //     );
 
             Gizmos.color = Color.green;
-            Gizmos.DrawLine(from, from + Velocity);
-            // Gizmos.color = Color.blue;
-            // Gizmos.DrawLine(from, from + transform.forward * 10f);
+            Gizmos.DrawLine(from, from + transform.forward * CurrentSpeedUnitPerSec);
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(from, from + AngularVelocity);
+            Gizmos.DrawLine(from, from + transform.up * CurrentAngularSpeedDegPerSec);
 
             Gizmos.color = ogColor;
         }

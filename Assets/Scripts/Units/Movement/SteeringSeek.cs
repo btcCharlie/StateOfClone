@@ -13,7 +13,7 @@ namespace StateOfClone.Units
             Vector3 desiredVelocity =
                 (target - _rb.position).normalized * _unit.UnitData.MaxSpeed;
 
-            Vector3 currentVelocity = transform.forward * _locomotion.CurrentSpeed;
+            Vector3 currentVelocity = transform.forward * _locomotion.CurrentSpeedUnitPerSec;
 
             _yaw = CalculateYaw(desiredVelocity, currentVelocity);
             _pitch = CalculatePitch(desiredVelocity, currentVelocity);

@@ -2,8 +2,10 @@ using UnityEngine;
 
 namespace StateOfClone.Units
 {
-    public class WheeledLocomotion : Locomotion
+    public class TrackedLocomotion : Locomotion
     {
+        [SerializeField] private float _inPlaceTurnAngleLimitDegrees = 30f;
+
         protected override void FixedUpdate()
         {
             // Calculate the new position and rotation
@@ -12,16 +14,15 @@ namespace StateOfClone.Units
                 );
             CurrentAngularSpeedDegPerSec = Mathf.Clamp(
                 SteeringParams.Yaw * _unitData.MaxTurnRate,
-                -_unitData.MaxTurnRate,
-                _unitData.MaxTurnRate
+                 -_unitData.MaxTurnRate,
+                 _unitData.MaxTurnRate
                 );
-
             Vector3 newPosition =
                 _rb.position +
                 CurrentSpeedUnitPerSec * Time.fixedDeltaTime * transform.forward;
 
-            // float yawAdjustment = CurrentAngularSpeedDegPerSec * Time.fixedDeltaTime;
-            // Debug.Log($"Yaw adjustment vals: {SteeringParams.Yaw} * {_unitData.MaxTurnRate}°/s * {Time.fixedDeltaTime}s = {yawAdjustment}°");
+            // float yawAdjustment = CurrentSpeedUnitPerSec * _unitData.MaxTurnRate;
+            // Debug.Log($"Yaw adjustment vals: {SteeringParams.Yaw} * {_unitData.MaxTurnRate}°/s = {CurrentAngularSpeedDegPerSec}°/s");
             Quaternion newRotation = Quaternion.Euler(
                 0f, CurrentAngularSpeedDegPerSec * Time.fixedDeltaTime, 0f
                 ) * _rb.rotation;
@@ -40,7 +41,10 @@ namespace StateOfClone.Units
             }
 
             // Update the unit's position and rotation
-            _rb.position = newPosition;
+            if (Mathf.Abs(CurrentAngularSpeedDegPerSec) < _inPlaceTurnAngleLimitDegrees)
+            {
+                _rb.position = newPosition;
+            }
             _rb.rotation = newRotation;
         }
     }
