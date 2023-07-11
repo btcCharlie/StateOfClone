@@ -34,9 +34,6 @@ namespace StateOfClone.Units
                 currentDirection, desiredDirection, Vector3.up
                 );
 
-            // Debug.Log($"Current: {currentDirection}, Desired: {desiredDirection}");
-            // Debug.Log($"Yaw difference: {angleDifferenceDegrees}°");
-
             return angleDifferenceDegrees;
         }
 
@@ -64,10 +61,6 @@ namespace StateOfClone.Units
             Gizmos.color = Color.grey;
             Vector3 thrustPoint = transformPosition + transform.forward * _speed;
             Gizmos.DrawLine(transformPosition, thrustPoint);
-            // Gizmos.color = Color.green;
-            // Gizmos.DrawLine(from, from + _locomotion.Velocity * 10f);
-            // Gizmos.color = Color.green;
-            // Gizmos.DrawLine(transformPosition, transformPosition + _locomotion.Velocity);
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(
                 thrustPoint,
