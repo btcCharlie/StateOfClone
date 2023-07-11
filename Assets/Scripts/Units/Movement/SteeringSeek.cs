@@ -37,7 +37,7 @@ namespace StateOfClone.Units
             // Debug.Log($"Current: {currentDirection}, Desired: {desiredDirection}");
             // Debug.Log($"Yaw difference: {angleDifferenceDegrees}°");
 
-            return angleDifferenceDegrees / yawMaxTurnRateDegrees;
+            return angleDifferenceDegrees;
         }
 
         protected override float CalculatePitch(Vector3 desiredVelocity, Vector3 currentSpeed)
