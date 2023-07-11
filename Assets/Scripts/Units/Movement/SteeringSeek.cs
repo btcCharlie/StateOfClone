@@ -4,7 +4,6 @@ namespace StateOfClone.Units
 {
     public class SteeringSeek : SteeringBehavior
     {
-        [SerializeField] private float yawMaxTurnRateDegrees = 30f;
         private float _yaw, _pitch, _speed;
 
         public override SteeringParams GetSteering(Vector3 target)
@@ -27,7 +26,7 @@ namespace StateOfClone.Units
         {
             // Calculate the angle difference between the current and 
             // desired velocity along the world horizontal plane
-            Vector3 currentDirection = currentVelocity.normalized;
+            Vector3 currentDirection = transform.forward;
             Vector3 desiredDirection = desiredVelocity.normalized;
             currentDirection = new(currentDirection.x, 0, currentDirection.z);
             desiredDirection = new(desiredDirection.x, 0, desiredDirection.z);
