@@ -23,6 +23,7 @@ namespace StateOfClone.Units
         public float MaxTurnRate;
         public int VisionRange;
         public int Health;
+        public bool IsAirborne;
 
         public float FrictionCoefficient;
     }

@@ -20,7 +20,7 @@ namespace StateOfClone.Units
             Instance = this;
         }
 
-        internal void SpawnUnit(Vector3 point)
+        public void SpawnUnit(Vector3 point)
         {
             GameObject unit = Instantiate(_unitPrefab, point, Quaternion.identity);
             unit.transform.SetParent(transform, true);

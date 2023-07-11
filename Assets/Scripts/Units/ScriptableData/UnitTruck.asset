@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dea2be0e1450645449c010bd863384e9, type: 3}
-  m_Name: UnitTank
+  m_Name: UnitTruck
   m_EditorClassIdentifier: 
   MaxAcceleration: 10
-  MaxSpeed: 12
+  MaxSpeed: 20
   MaxAngularAcceleration: 60
-  MaxTurnRate: 50
-  VisionRange: 15
+  MaxTurnRate: 60
+  VisionRange: 10
   Health: 0
   IsAirborne: 0
   FrictionCoefficient: 0.1
