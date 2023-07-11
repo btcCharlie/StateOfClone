@@ -1353,7 +1353,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 342afa3769b356f459237404a669e724, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  yawMaxTurnRateDegrees: 10
 --- !u!114 &4540291229628424227
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1367,7 +1366,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _groundDetectionRange: 10
-  _recentNormalsCount: 30
+  _recentNormalsCount: 10
 --- !u!1 &8113065935367883352
 GameObject:
   m_ObjectHideFlags: 0
