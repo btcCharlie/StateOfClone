@@ -19,7 +19,13 @@ namespace StateOfClone.Units
 
             _yaw = CalculateYaw(desiredVelocity, currentVelocity);
             _pitch = CalculatePitch(desiredVelocity, currentVelocity);
-            _speed = CalculateSpeed(desiredVelocity, currentVelocity);
+
+            float expectedYawTurnRate =
+                _locomotion.GetTurnRateFromDeviation(_yaw);
+            float trueMaxSpeed =
+                _locomotion.GetMaxSpeedAtTurnRate(expectedYawTurnRate);
+
+            _speed = CalculateSpeed(desiredVelocity, trueMaxSpeed);
 
             // Create and return the SteeringParams
             return new SteeringParams(_yaw, _pitch, _speed);
@@ -46,12 +52,14 @@ namespace StateOfClone.Units
             return 0f;
         }
 
-        protected override float CalculateSpeed(Vector3 desiredVelocity, Vector3 currentSpeed)
+        protected override float CalculateSpeed(Vector3 desiredVelocity, float trueMaxSpeed)
         {
             // For the Arrival behavior, the speed should be the magnitude of the desired velocity
-            return desiredVelocity.magnitude;
+            return Mathf.Clamp(
+                desiredVelocity.magnitude,
+                -trueMaxSpeed,
+                trueMaxSpeed
+                );
         }
-
-        // Rest of the code...
     }
 }

@@ -1366,6 +1366,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c50909a66381f245a2407e761ff24ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  YAWCURVESCALE: 3
+  SPEEDCURVESLANT: 0.1
   _airborneAltitude: 15
   _groundDetectionRange: 10
   _recentNormalsCount: 10

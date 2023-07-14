@@ -2,17 +2,25 @@ using UnityEngine;
 
 namespace StateOfClone.Units
 {
+    /// <summary>
+    /// Physical motion of units.
+    /// </summary>
     [RequireComponent(typeof(Unit))]
     public abstract class Locomotion : MonoBehaviour, IUnitAction
     {
         public SteeringParams SteeringParams { get; set; }
 
-        protected const float MinTurnRate = 5f;
-        protected const int YAWCURVESCALE = 3;
+        [SerializeField] protected float YAWCURVESCALE = 3f;
+        [SerializeField] protected float SPEEDCURVESLANT = 0.5f;
+
         protected Rigidbody _rb;
         protected LayerMask _groundLayer;
         protected Unit _unit;
-        protected UnitData _unitData;
+        protected UnitData _ud;
+        protected float _actualMaxSpeed;
+
+        private float _midTurnRate;
+        private float _speedStretch;
 
         [SerializeField] protected float _airborneAltitude = 15f;
         [SerializeField] protected float _groundDetectionRange = 10f;
@@ -25,7 +33,7 @@ namespace StateOfClone.Units
         protected virtual void Awake()
         {
             _unit = GetComponent<Unit>();
-            _unitData = _unit.UnitData;
+            _ud = _unit.UnitData;
             _rb = GetComponent<Rigidbody>();
             _groundLayer = LayerMask.GetMask("Ground");
             _recentNormals = new Vector3[_recentNormalsCount];
@@ -47,6 +55,14 @@ namespace StateOfClone.Units
                     transform.up, hit.normal
                     ) * _rb.rotation;
             }
+
+            _actualMaxSpeed = _ud.MaxSpeed;
+            _midTurnRate = (_ud.MaxTurnRate - _ud.MinTurnRate) / 2f + _ud.MinTurnRate;
+            float expKMinMid = Mathf.Exp(
+                SPEEDCURVESLANT * (_ud.MinTurnRate - _midTurnRate)
+                );
+            _speedStretch =
+                2f * (_ud.MinSpeed - _ud.MaxSpeed) * expKMinMid / (expKMinMid - 1f);
         }
 
         protected virtual void FixedUpdate()
@@ -71,6 +87,20 @@ namespace StateOfClone.Units
             }
 
             ApplySteering(newPosition, newRotation);
+
+            _actualMaxSpeed = GetMaxSpeedAtTurnRate(CurrentAngularSpeedDegPerSec);
+        }
+
+        public virtual float GetMaxSpeedAtTurnRate(float turnRate)
+        {
+            turnRate = Mathf.Clamp(
+                Mathf.Abs(turnRate), _ud.MinTurnRate, _ud.MaxTurnRate
+                );
+
+            return
+                (_ud.MaxSpeed - _ud.MinSpeed + _speedStretch) /
+                (1f + Mathf.Exp(-SPEEDCURVESLANT * (-turnRate + _midTurnRate))) +
+                _ud.MinSpeed - _speedStretch / 2f;
         }
 
         protected abstract void ApplySteering(
@@ -117,7 +147,7 @@ namespace StateOfClone.Units
             ref Vector3 newPosition, ref Quaternion newRotation, RaycastHit hit
             )
         {
-            if (_unitData.IsAirborne)
+            if (_ud.IsAirborne)
             {
                 newPosition.y = hit.point.y + _airborneAltitude;
             }
@@ -133,56 +163,54 @@ namespace StateOfClone.Units
 
         protected virtual void UpdateSpeeds()
         {
-            // Debug.Log($"Steering yaw: {SteeringParams.Yaw}");
-
             CurrentSpeedUnitPerSec = GetSpeed(SteeringParams.Speed);
 
-            CurrentAngularSpeedDegPerSec = GetTurnRate(SteeringParams.Yaw);
+            CurrentAngularSpeedDegPerSec =
+                GetTurnRateFromDeviation(SteeringParams.Yaw);
         }
 
-        private float GetSpeed(float speedDeviation)
+        protected float GetSpeed(float speedDeviation)
         {
             return Mathf.Clamp(
                 speedDeviation,
-                    -_unitData.MaxSpeed,
-                    _unitData.MaxSpeed
+                -_actualMaxSpeed,
+                _actualMaxSpeed
                 );
         }
 
         /// <summary>
-        /// Uses an expression: 
+        /// Converts the provided angle deviation in degrees to a turn rate in
+        /// degrees per second. Uses a polynomial expression: 
         /// (minTurn - maxTurn) * (1 - yawDeviation / maxTurn) ^ yawCurveScale + maxTurn
-        /// for positive YawDeviation and the inverse for negative
-        /// to control the transition between max turn rate and zero,
-        /// namely to avoid slow turning speeds at low deviations
+        /// Prevents slow turning speeds at low deviations.
         /// </summary>
         /// <param name="yawDeviation">The steering signal for horizontal turning</param>
         /// <returns>The actual turn rate of the vehicle bound by its limits</returns>
-        private float GetTurnRate(float yawDeviation)
+        public float GetTurnRateFromDeviation(float yawDeviation)
         {
             float unboundTurnRate = yawDeviation switch
             {
                 float when yawDeviation > 0 =>
-                    ((MinTurnRate - _unitData.MaxTurnRate) *
+                    ((_ud.MinTurnRate - _ud.MaxTurnRate) *
                     Mathf.Pow(
-                        1 - yawDeviation / _unitData.MaxTurnRate,
+                        1 - yawDeviation / _ud.MaxTurnRate,
                         YAWCURVESCALE
                         )) +
-                    _unitData.MaxTurnRate,
+                    _ud.MaxTurnRate,
                 float when yawDeviation < 0 =>
-                    (_unitData.MaxTurnRate - MinTurnRate) *
+                    (_ud.MaxTurnRate - _ud.MinTurnRate) *
                     Mathf.Pow(
-                        1 + yawDeviation / _unitData.MaxTurnRate,
+                        1 + yawDeviation / _ud.MaxTurnRate,
                         YAWCURVESCALE
                         ) -
-                    _unitData.MaxTurnRate,
+                    _ud.MaxTurnRate,
                 _ => 0f,
             };
 
             return Mathf.Clamp(
                 unboundTurnRate,
-                 -_unitData.MaxTurnRate,
-                 _unitData.MaxTurnRate
+                 -_ud.MaxTurnRate,
+                 _ud.MaxTurnRate
                 );
         }
 

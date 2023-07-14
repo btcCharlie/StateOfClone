@@ -10,9 +10,13 @@ namespace StateOfClone.Units
         /// </summary>
         public float MaxAcceleration;
         /// <summary>
-        /// Maximum speed (velocity magnitude) in units per second.
+        /// Maximum possible speed in units per second.
         /// </summary>
         public float MaxSpeed;
+        /// <summary>
+        /// Speed at max turning rate in units per second.
+        /// </summary>
+        public float MinSpeed;
         /// <summary>
         /// Maximum angular acceleration in degrees per second squared.
         /// </summary>
@@ -21,6 +25,10 @@ namespace StateOfClone.Units
         /// Maximum rate of turning in degrees per second.
         /// </summary>
         public float MaxTurnRate;
+        /// <summary>
+        /// Turning rate at max speed in degrees per second.
+        /// </summary>
+        public float MinTurnRate;
         public int VisionRange;
         public int Health;
         public bool IsAirborne;

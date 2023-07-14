@@ -22,6 +22,6 @@ namespace StateOfClone.Units
 
         protected abstract float CalculatePitch(Vector3 steeringForce, Vector3 currentSpeed);
 
-        protected abstract float CalculateSpeed(Vector3 steeringForce, Vector3 currentSpeed);
+        protected abstract float CalculateSpeed(Vector3 steeringForce, float trueMaxSpeed);
     }
 }
