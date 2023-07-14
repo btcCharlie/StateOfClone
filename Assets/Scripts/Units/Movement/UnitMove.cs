@@ -49,7 +49,7 @@ namespace StateOfClone.Units
             enabled = false;
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             if (_path == null || _path.Count == 0)
             {
