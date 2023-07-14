@@ -20,8 +20,6 @@ namespace StateOfClone.Units
             Vector3 newPosition, Quaternion newRotation
             )
         {
-            Debug.Log($"Active limit: {_activeLimit}");
-
             if (Mathf.Abs(SteeringParams.Yaw) <= _activeLimit)
             {
                 _rb.position = newPosition;

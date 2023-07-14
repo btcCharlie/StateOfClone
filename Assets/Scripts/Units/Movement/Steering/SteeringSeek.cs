@@ -12,11 +12,18 @@ namespace StateOfClone.Units
             Vector3 desiredVelocity =
                 (target - _rb.position).normalized * _unit.UnitData.MaxSpeed;
 
-            Vector3 currentVelocity = transform.forward * _locomotion.CurrentSpeedUnitPerSec;
+            Vector3 currentVelocity =
+                transform.forward * _locomotion.CurrentSpeedUnitPerSec;
 
             _yaw = CalculateYaw(desiredVelocity, currentVelocity);
             _pitch = CalculatePitch(desiredVelocity, currentVelocity);
-            _speed = CalculateSpeed(desiredVelocity, currentVelocity);
+
+            float expectedYawTurnRate =
+                _locomotion.GetTurnRateFromDeviation(_yaw);
+            float trueMaxSpeed =
+                _locomotion.GetMaxSpeedAtTurnRate(expectedYawTurnRate);
+
+            _speed = CalculateSpeed(desiredVelocity, trueMaxSpeed);
 
             // Create and return the SteeringParams
             return new SteeringParams(_yaw, _pitch, _speed);
@@ -34,9 +41,6 @@ namespace StateOfClone.Units
                 currentDirection, desiredDirection, Vector3.up
                 );
 
-            // Debug.Log($"Current: {currentDirection}, Desired: {desiredDirection}");
-            // Debug.Log($"Yaw difference: {angleDifferenceDegrees}°");
-
             return angleDifferenceDegrees;
         }
 
@@ -46,7 +50,7 @@ namespace StateOfClone.Units
             return 0f;
         }
 
-        protected override float CalculateSpeed(Vector3 desiredVelocity, Vector3 currentSpeed)
+        protected override float CalculateSpeed(Vector3 desiredVelocity, float trueMaxSpeed)
         {
             // For the Seek behavior, the speed should always be the maximum speed
             return _unit.UnitData.MaxSpeed;
@@ -64,10 +68,6 @@ namespace StateOfClone.Units
             Gizmos.color = Color.grey;
             Vector3 thrustPoint = transformPosition + transform.forward * _speed;
             Gizmos.DrawLine(transformPosition, thrustPoint);
-            // Gizmos.color = Color.green;
-            // Gizmos.DrawLine(from, from + _locomotion.Velocity * 10f);
-            // Gizmos.color = Color.green;
-            // Gizmos.DrawLine(transformPosition, transformPosition + _locomotion.Velocity);
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(
                 thrustPoint,

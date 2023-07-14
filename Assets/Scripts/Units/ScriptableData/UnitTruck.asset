@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxAcceleration: 10
   MaxSpeed: 20
+  MinSpeed: 5
   MaxAngularAcceleration: 60
   MaxTurnRate: 60
+  MinTurnRate: 15
   VisionRange: 10
   Health: 0
   IsAirborne: 0
