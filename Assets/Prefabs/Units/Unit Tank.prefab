@@ -1038,8 +1038,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0e2d78538dfdcc4581034cfb0a5dbe6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  YAWCURVESCALE: 3
+  SPEEDCURVESLANT: 0.1
+  _airborneAltitude: 15
   _groundDetectionRange: 10
   _recentNormalsCount: 10
+  _recentSpeedsCount: 5
   _inPlaceTurnLowerLimitDegrees: 5
   _inPlaceTurnUpperLimitDegrees: 15
 --- !u!1 &8113065935367883352

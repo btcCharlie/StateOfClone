@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 namespace StateOfClone.Units
 {
@@ -11,7 +12,7 @@ namespace StateOfClone.Units
         public SteeringParams SteeringParams { get; set; }
 
         [SerializeField] protected float YAWCURVESCALE = 3f;
-        [SerializeField] protected float SPEEDCURVESLANT = 0.5f;
+        [SerializeField] protected float SPEEDCURVESLANT = 0.1f;
 
         protected Rigidbody _rb;
         protected LayerMask _groundLayer;
@@ -27,6 +28,9 @@ namespace StateOfClone.Units
         [SerializeField] protected int _recentNormalsCount = 10;
         protected Vector3[] _recentNormals;
 
+        [SerializeField] protected int _recentSpeedsCount = 5;
+        protected float[] _recentSpeeds;
+
         public float CurrentSpeedUnitPerSec { get; protected set; }
         public float CurrentAngularSpeedDegPerSec { get; protected set; }
 
@@ -37,6 +41,7 @@ namespace StateOfClone.Units
             _rb = GetComponent<Rigidbody>();
             _groundLayer = LayerMask.GetMask("Ground");
             _recentNormals = new Vector3[_recentNormalsCount];
+            _recentSpeeds = new float[_recentSpeedsCount];
             CurrentSpeedUnitPerSec = 0f;
             CurrentAngularSpeedDegPerSec = 0f;
         }
@@ -56,6 +61,11 @@ namespace StateOfClone.Units
                     ) * _rb.rotation;
             }
 
+            for (int i = 0; i < _recentSpeeds.Length; i++)
+            {
+                _recentSpeeds[i] = 0f;
+            }
+
             _actualMaxSpeed = _ud.MaxSpeed;
             _midTurnRate = (_ud.MaxTurnRate - _ud.MinTurnRate) / 2f + _ud.MinTurnRate;
             float expKMinMid = Mathf.Exp(
@@ -71,7 +81,7 @@ namespace StateOfClone.Units
 
             Vector3 newPosition =
                 _rb.position +
-                CurrentSpeedUnitPerSec * Time.fixedDeltaTime * transform.forward;
+                GetSpeedMovingAverage() * Time.fixedDeltaTime * transform.forward;
 
             Quaternion newRotation = Quaternion.Euler(
                 0f, CurrentAngularSpeedDegPerSec * Time.fixedDeltaTime, 0f
@@ -88,6 +98,7 @@ namespace StateOfClone.Units
 
             ApplySteering(newPosition, newRotation);
 
+            AddNewSpeed(CurrentSpeedUnitPerSec);
             _actualMaxSpeed = GetMaxSpeedAtTurnRate(CurrentAngularSpeedDegPerSec);
         }
 
@@ -129,6 +140,16 @@ namespace StateOfClone.Units
             return sum / _recentNormals.Length;
         }
 
+        protected float GetSpeedMovingAverage()
+        {
+            float sum = 0f;
+            for (int i = 0; i < _recentSpeeds.Length; i++)
+            {
+                sum += _recentSpeeds[i];
+            }
+            return sum / _recentSpeeds.Length;
+        }
+
         /// <summary>
         /// Moves the moving average of normals one forward and replaces the 
         /// last element with newNormal.
@@ -141,6 +162,20 @@ namespace StateOfClone.Units
                 _recentNormals[i] = _recentNormals[i + 1];
             }
             _recentNormals[^1] = newNormal;
+        }
+
+        /// <summary>
+        /// Moves the moving average of speeds one forward and replaces the 
+        /// last element with newSpeed.
+        /// </summary>
+        /// <param name="newSpeed">The new speed to add</param>
+        protected void AddNewSpeed(float newSpeed)
+        {
+            for (int i = 0; i < _recentSpeeds.Length - 1; i++)
+            {
+                _recentSpeeds[i] = _recentSpeeds[i + 1];
+            }
+            _recentSpeeds[^1] = newSpeed;
         }
 
         protected virtual void UpdateElevationAndNormal(

@@ -13,7 +13,6 @@ namespace StateOfClone.Units
             base.Start();
 
             _activeLimit = _inPlaceTurnLowerLimitDegrees;
-
         }
 
         protected override void ApplySteering(
@@ -29,16 +28,22 @@ namespace StateOfClone.Units
                 CurrentSpeedUnitPerSec = 0f;
             }
 
-            if (Mathf.Abs(CurrentSpeedUnitPerSec) < 0.1f)
-            {
-                _activeLimit = _inPlaceTurnLowerLimitDegrees;
-            }
-            else
-            {
-                _activeLimit = _inPlaceTurnUpperLimitDegrees;
-            }
+            _activeLimit =
+                Mathf.Abs(CurrentSpeedUnitPerSec) < 0.1f ?
+                _inPlaceTurnLowerLimitDegrees :
+                _inPlaceTurnUpperLimitDegrees;
 
             _rb.rotation = newRotation;
+        }
+
+        public override float GetMaxSpeedAtTurnRate(float turnRate)
+        {
+            if (turnRate >= _activeLimit)
+            {
+                return 0f;
+            }
+
+            return base.GetMaxSpeedAtTurnRate(turnRate);
         }
     }
 }
