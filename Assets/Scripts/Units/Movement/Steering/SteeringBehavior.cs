@@ -2,25 +2,29 @@ using UnityEngine;
 
 namespace StateOfClone.Units
 {
-    [RequireComponent(typeof(Unit), typeof(Rigidbody))]
-    public abstract class SteeringBehavior : MonoBehaviour
+    public interface ISteeringBehavior
     {
-        protected Rigidbody _rb;
-        protected Unit _unit;
+        SteeringParams GetSteering(Vector3 position, Vector3 target);
+    }
+
+    public abstract class SteeringBehavior : ISteeringBehavior
+    {
+        // protected Rigidbody _rb;
+        // protected Unit _unit;
+        protected UnitData _ud;
         protected Locomotion _locomotion;
 
-        protected virtual void Awake()
+        public SteeringBehavior(UnitData ud, Locomotion locomotion)
         {
-            _rb = GetComponent<Rigidbody>();
-            _unit = GetComponent<Unit>();
-            _locomotion = GetComponent<Locomotion>();
+            _ud = ud;
+            _locomotion = locomotion;
         }
 
-        public abstract SteeringParams GetSteering(Vector3 target);
+        public abstract SteeringParams GetSteering(Vector3 position, Vector3 target);
 
-        protected abstract float CalculateYaw(Vector3 steeringForce, Vector3 currentSpeed);
+        protected abstract float CalculateYaw(Vector3 steeringForce);
 
-        protected abstract float CalculatePitch(Vector3 steeringForce, Vector3 currentSpeed);
+        protected abstract float CalculatePitch(Vector3 steeringForce);
 
         protected abstract float CalculateSpeed(Vector3 steeringForce, float trueMaxSpeed);
     }
