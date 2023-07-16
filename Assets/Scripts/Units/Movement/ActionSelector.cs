@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 namespace StateOfClone.Units
 {
@@ -11,6 +13,12 @@ namespace StateOfClone.Units
         [SerializeField] private LayerMask _groundLayer;
 
         private Unit _unit;
+        private SteeringBehavior _currentBehavior;
+
+        public SteeringBehavior CurrentBehavior
+        {
+            get { return _currentBehavior; }
+        }
 
         private List<Vector3> _path;
 
@@ -19,6 +27,23 @@ namespace StateOfClone.Units
             _unit = GetComponent<Unit>();
 
             _path = new List<Vector3>();
+        }
+
+        public void SetBehavior(Type newBehaviorType)
+        {
+            if (_currentBehavior != null)
+            {
+#if UNITY_EDITOR
+                if (!EditorUtility.IsPersistent(_currentBehavior))
+                {
+                    DestroyImmediate(_currentBehavior);
+                }
+#else
+                Destroy(_currentBehavior);
+#endif
+            }
+
+            _currentBehavior = gameObject.AddComponent(newBehaviorType) as SteeringBehavior;
         }
 
         public void AddWaypoint(Vector3 newWaypoint)
@@ -31,25 +56,6 @@ namespace StateOfClone.Units
             _path.Clear();
         }
 
-        private void OnDrawGizmosSelected()
-        {
-            if (_path == null || _path.Count == 0)
-                return;
 
-            // draw the waypoints from path as small red spheres with the 
-            // currently active waypoint (the last one) as a larger red sphere
-            // also, draw a line between the waypoints, ending at the transform's
-            // current position
-            Color prevColor = Gizmos.color;
-            Gizmos.color = Color.red;
-            for (int i = 0; i < _path.Count - 1; i++)
-            {
-                Gizmos.DrawSphere(_path[i], 0.5f);
-                Gizmos.DrawLine(_path[i], _path[i + 1]);
-            }
-            Gizmos.DrawSphere(_path[^1], 1f);
-            Gizmos.DrawLine(transform.position, _path[^1]);
-            Gizmos.color = prevColor;
-        }
     }
 }
