@@ -118,16 +118,37 @@ namespace StateOfClone.Units
             Vector3 newPosition, Quaternion newRotation
             );
 
-        protected virtual void OnDisable()
+        /// <summary>
+        /// Repeatedly clears the movement input until the vehicle stops,
+        /// then disables to component to stop calculating new movement.
+        /// </summary>
+        public virtual void StopMovement()
         {
-            StopMovement();
+            ClearMovementInput();
+            StartCoroutine(StopMovementAndDisable_Co());
         }
 
-        public virtual void StopMovement()
+        protected virtual void OnDisable()
+        {
+            ClearMovementInput();
+        }
+
+        protected virtual void ClearMovementInput()
         {
             CurrentSpeedUnitPerSec = 0f;
             CurrentAngularSpeedDegPerSec = 0f;
             SteeringParams = SteeringParams.Zero;
+        }
+
+        protected IEnumerator StopMovementAndDisable_Co()
+        {
+            WaitForFixedUpdate waitForFixedUpdate = new();
+            while (GetSpeedMovingAverage() != 0f)
+            {
+                ClearMovementInput();
+                yield return waitForFixedUpdate;
+            }
+            enabled = false;
         }
 
         protected Vector3 GetNormalMovingAverage()
@@ -167,6 +188,8 @@ namespace StateOfClone.Units
         /// <summary>
         /// Moves the moving average of speeds one forward and replaces the 
         /// last element with newSpeed.
+        /// Never add speed calculated by the moving average! It would fall 
+        /// into a cycle.
         /// </summary>
         /// <param name="newSpeed">The new speed to add</param>
         protected void AddNewSpeed(float newSpeed)

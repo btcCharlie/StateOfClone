@@ -54,7 +54,7 @@ namespace StateOfClone.Units
             if (_path == null || _path.Count == 0)
             {
                 DisableIfDeselected();
-                _locomotion.enabled = false;
+                _locomotion.StopMovement();
                 return;
             }
             _locomotion.enabled = true;
@@ -79,7 +79,7 @@ namespace StateOfClone.Units
 
         private void DisableIfDeselected()
         {
-            enabled = _locomotion.enabled = _isSelected;
+            enabled = _isSelected;
         }
 
         private void OnDestroy()
