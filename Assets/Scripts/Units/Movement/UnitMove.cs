@@ -34,7 +34,7 @@ namespace StateOfClone.Units
             _rigidbody = GetComponent<Rigidbody>();
             _locomotion = GetComponent<Locomotion>();
 
-            _steeringBehaviors = GetComponents<SteeringBehavior>();
+            // _steeringBehaviors = GetComponents<SteeringBehavior>();
 
             _path = new List<Vector3>();
         }
@@ -70,7 +70,7 @@ namespace StateOfClone.Units
             SteeringParams steeringParams = SteeringParams.Zero;
             foreach (SteeringBehavior steering in _steeringBehaviors)
             {
-                steeringParams += steering.GetSteering(target);
+                steeringParams += steering.GetSteering(_rigidbody.position, target);
             }
             steeringParams /= (float)_steeringBehaviors.Length;
 

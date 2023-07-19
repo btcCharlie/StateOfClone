@@ -34,7 +34,7 @@ namespace StateOfClone.Units
         {
             // Calculate the angle difference between the current and 
             // desired velocity along the world horizontal plane
-            Vector3 currentDirection = _locomotion.CurrentVelocity.normalized;
+            Vector3 currentDirection = _locomotion.transform.forward;
             Vector3 desiredDirection = desiredVelocity.normalized;
             currentDirection = new(currentDirection.x, 0, currentDirection.z);
             desiredDirection = new(desiredDirection.x, 0, desiredDirection.z);

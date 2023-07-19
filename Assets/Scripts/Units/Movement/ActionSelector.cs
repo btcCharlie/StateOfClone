@@ -13,9 +13,19 @@ namespace StateOfClone.Units
         [SerializeField] private LayerMask _groundLayer;
 
         private Unit _unit;
-        private SteeringBehavior _currentBehavior;
+        private ISteeringBehavior _currentBehavior;
+        private readonly List<ISteeringBehavior> _behaviors = new();
 
-        public SteeringBehavior CurrentBehavior
+        public UnitData UnitData
+        {
+            get { return GetComponent<Unit>().UnitData; }
+        }
+        public Locomotion Locomotion
+        {
+            get { return GetComponent<Locomotion>(); }
+        }
+
+        public ISteeringBehavior CurrentBehavior
         {
             get { return _currentBehavior; }
         }
@@ -29,21 +39,13 @@ namespace StateOfClone.Units
             _path = new List<Vector3>();
         }
 
-        public void SetBehavior(Type newBehaviorType)
+        private void FixedUpdate()
         {
-            if (_currentBehavior != null)
-            {
-#if UNITY_EDITOR
-                if (!EditorUtility.IsPersistent(_currentBehavior))
-                {
-                    DestroyImmediate(_currentBehavior);
-                }
-#else
-                Destroy(_currentBehavior);
-#endif
-            }
+        }
 
-            _currentBehavior = gameObject.AddComponent(newBehaviorType) as SteeringBehavior;
+        public void SetBehavior(ISteeringBehavior newBehavior)
+        {
+            _currentBehavior = newBehavior;
         }
 
         public void AddWaypoint(Vector3 newWaypoint)
@@ -56,6 +58,14 @@ namespace StateOfClone.Units
             _path.Clear();
         }
 
+        public void AddBehavior(ISteeringBehavior behavior)
+        {
+            _behaviors.Add(behavior);
+        }
 
+        public void RemoveBehavior(ISteeringBehavior behavior)
+        {
+            _behaviors.Remove(behavior);
+        }
     }
 }
