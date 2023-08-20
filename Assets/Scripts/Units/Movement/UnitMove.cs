@@ -18,11 +18,11 @@ namespace StateOfClone.Units
         private Unit _unit;
         private Rigidbody _rigidbody;
         private Locomotion _locomotion;
+        private ActionSelector _actionSelector;
 
         private bool _isSelected = false;
 
         private List<Vector3> _path;
-        private SteeringBehavior[] _steeringBehaviors;
 
         private Quaternion fromRotation, toRotation;
 
@@ -33,8 +33,7 @@ namespace StateOfClone.Units
             _unit = GetComponent<Unit>();
             _rigidbody = GetComponent<Rigidbody>();
             _locomotion = GetComponent<Locomotion>();
-
-            // _steeringBehaviors = GetComponents<SteeringBehavior>();
+            _actionSelector = GetComponent<ActionSelector>();
 
             _path = new List<Vector3>();
         }
@@ -68,11 +67,13 @@ namespace StateOfClone.Units
             }
 
             SteeringParams steeringParams = SteeringParams.Zero;
-            foreach (SteeringBehavior steering in _steeringBehaviors)
+            foreach (SteeringBehavior steering in _actionSelector.Behaviors)
             {
                 steeringParams += steering.GetSteering(_rigidbody.position, target);
             }
-            steeringParams /= (float)_steeringBehaviors.Length;
+            steeringParams /=
+                _actionSelector.Behaviors.Count == 0 ?
+                1f : (float)_actionSelector.Behaviors.Count;
 
             _locomotion.SteeringParams = steeringParams;
         }

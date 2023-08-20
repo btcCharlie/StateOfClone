@@ -12,6 +12,7 @@ namespace StateOfClone
         private List<Type> _steeringTypes;
         private string[] _steeringTypeNames;
         private int _selectedOption = -1;
+        private bool _showBehaviors = true;
 
         public override void OnInspectorGUI()
         {
@@ -25,17 +26,34 @@ namespace StateOfClone
             {
                 if (_selectedOption >= 0)
                 {
-                    UnitData unitData = actionSelector.GetComponent<Unit>().UnitData;
-                    Locomotion locomotion = actionSelector.GetComponent<Locomotion>();
+                    // Add the selected behavior
+                    actionSelector.AddBehavior(_steeringTypeNames[_selectedOption]);
+                }
+            }
 
-                    // Create a new instance of the selected behavior
-                    ISteeringBehavior newBehavior =
-                        (ISteeringBehavior)Activator.CreateInstance(
-                            _steeringTypes[_selectedOption], unitData, locomotion
-                            );
+            // // Display the list of behaviors
+            // EditorGUILayout.LabelField("Behaviors:");
+            // foreach (ISteeringBehavior behavior in actionSelector.Behaviors)
+            // {
+            //     EditorGUILayout.SelectableLabel("- " + behavior.GetType().Name);
+            // }
 
-                    // Add the new behavior to the ActionSelector
-                    actionSelector.AddBehavior(newBehavior);
+            // Display the list of behaviors in a collapsible box
+            _showBehaviors = EditorGUILayout.Foldout(_showBehaviors, "Behaviors:");
+            if (_showBehaviors)
+            {
+                foreach (ISteeringBehavior behavior in actionSelector.Behaviors)
+                {
+                    EditorGUILayout.LabelField("- " + behavior.GetType().Name);
+                }
+
+                if (GUILayout.Button("Remove Behavior"))
+                {
+                    if (_selectedOption >= 0)
+                    {
+                        // Add the new behavior to the ActionSelector
+                        actionSelector.RemoveBehavior(_steeringTypeNames[_selectedOption]);
+                    }
                 }
             }
 
