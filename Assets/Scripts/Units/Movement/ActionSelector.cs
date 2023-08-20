@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 namespace StateOfClone.Units
 {
@@ -11,14 +13,36 @@ namespace StateOfClone.Units
         [SerializeField] private LayerMask _groundLayer;
 
         private Unit _unit;
+        private Locomotion _locomotion;
+        private ISteeringBehavior _currentBehavior;
+        private readonly List<ISteeringBehavior> _behaviors = new();
 
         private List<Vector3> _path;
+        public List<ISteeringBehavior> Behaviors
+        {
+            get { return _behaviors; }
+        }
+
+        public ISteeringBehavior CurrentBehavior
+        {
+            get { return _currentBehavior; }
+        }
 
         private void Awake()
         {
             _unit = GetComponent<Unit>();
+            _locomotion = GetComponent<Locomotion>();
 
             _path = new List<Vector3>();
+        }
+
+        private void FixedUpdate()
+        {
+        }
+
+        public void SetBehavior(ISteeringBehavior newBehavior)
+        {
+            _currentBehavior = newBehavior;
         }
 
         public void AddWaypoint(Vector3 newWaypoint)
@@ -31,25 +55,66 @@ namespace StateOfClone.Units
             _path.Clear();
         }
 
-        private void OnDrawGizmosSelected()
+        public void AddBehavior(ISteeringBehavior behavior)
         {
-            if (_path == null || _path.Count == 0)
-                return;
+            _behaviors.Add(behavior);
+        }
 
-            // draw the waypoints from path as small red spheres with the 
-            // currently active waypoint (the last one) as a larger red sphere
-            // also, draw a line between the waypoints, ending at the transform's
-            // current position
-            Color prevColor = Gizmos.color;
-            Gizmos.color = Color.red;
-            for (int i = 0; i < _path.Count - 1; i++)
+        public void AddBehavior(string behaviorType)
+        {
+            ISteeringBehavior newBehavior = null;
+
+#if UNITY_EDITOR
+            _unit = GetComponent<Unit>();
+            _locomotion = GetComponent<Locomotion>();
+#endif
+
+            switch (behaviorType)
             {
-                Gizmos.DrawSphere(_path[i], 0.5f);
-                Gizmos.DrawLine(_path[i], _path[i + 1]);
+                case "SteeringSeek":
+                    newBehavior = SteeringBehaviorFactory.CreateSteeringSeek(
+                        _unit.UnitData, _locomotion
+                        );
+                    break;
+                case "SteeringArrival":
+                    newBehavior = SteeringBehaviorFactory.CreateSteeringArrival(
+                        _unit.UnitData, _locomotion
+                        );
+                    break;
+                    // Add more cases for other types of steering behaviors...
             }
-            Gizmos.DrawSphere(_path[^1], 1f);
-            Gizmos.DrawLine(transform.position, _path[^1]);
-            Gizmos.color = prevColor;
+
+            if (newBehavior == null)
+            {
+                return;
+            }
+
+            _behaviors.Add(newBehavior);
+        }
+
+        public bool RemoveBehavior(ISteeringBehavior behavior)
+        {
+            return _behaviors.Remove(behavior);
+        }
+
+        public bool RemoveBehavior(string behaviorType)
+        {
+            ISteeringBehavior behaviorToRemove = default(SteeringBehavior);
+            foreach (ISteeringBehavior behavior in _behaviors)
+            {
+                if (behavior.GetType().Name == behaviorType)
+                {
+                    behaviorToRemove = behavior;
+                    break;
+                }
+            }
+
+            if (behaviorToRemove != default(SteeringBehavior))
+            {
+                return _behaviors.Remove(behaviorToRemove);
+            }
+
+            return false;
         }
     }
 }

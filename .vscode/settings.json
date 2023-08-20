@@ -55,5 +55,6 @@
     "editor.formatOnPaste": true,
     "editor.formatOnSave": true,
     "editor.formatOnSaveMode": "modifications",
-    "editor.formatOnType": true
+    "editor.formatOnType": true,
+    "dotnet.defaultSolution": "StateOfClone.sln"
 }

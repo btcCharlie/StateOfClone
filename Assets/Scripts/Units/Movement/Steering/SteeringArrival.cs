@@ -7,18 +7,23 @@ namespace StateOfClone.Units
         private float _yaw, _pitch, _speed;
         public float slowingDistance = 10f; // The distance at which the agent starts to slow down
 
-        public override SteeringParams GetSteering(Vector3 target)
+        public SteeringArrival(UnitData ud, Locomotion locomotion) : base(ud, locomotion)
+        {
+        }
+
+        public override SteeringParams GetSteering(Vector3 position, Vector3 target)
         {
             // Calculate the desired velocity
-            Vector3 direction = target - _rb.position;
+            Vector3 direction = target - position;
             float distance = direction.magnitude;
-            float speed = (distance < slowingDistance) ? _unit.UnitData.MaxSpeed * (distance / slowingDistance) : _unit.UnitData.MaxSpeed;
+            float speed =
+                (distance < slowingDistance) ?
+                _ud.MaxSpeed * (distance / slowingDistance) :
+                _ud.MaxSpeed;
             Vector3 desiredVelocity = direction.normalized * speed;
 
-            Vector3 currentVelocity = transform.forward * _locomotion.CurrentSpeedUnitPerSec;
-
-            _yaw = CalculateYaw(desiredVelocity, currentVelocity);
-            _pitch = CalculatePitch(desiredVelocity, currentVelocity);
+            _yaw = CalculateYaw(desiredVelocity);
+            _pitch = CalculatePitch(desiredVelocity);
 
             float expectedYawTurnRate =
                 _locomotion.GetTurnRateFromDeviation(_yaw);
@@ -31,11 +36,11 @@ namespace StateOfClone.Units
             return new SteeringParams(_yaw, _pitch, _speed);
         }
 
-        protected override float CalculateYaw(Vector3 desiredVelocity, Vector3 currentVelocity)
+        protected override float CalculateYaw(Vector3 desiredVelocity)
         {
             // Calculate the angle difference between the current and 
             // desired velocity along the world horizontal plane
-            Vector3 currentDirection = transform.forward;
+            Vector3 currentDirection = _locomotion.transform.forward;
             Vector3 desiredDirection = desiredVelocity.normalized;
             currentDirection = new(currentDirection.x, 0, currentDirection.z);
             desiredDirection = new(desiredDirection.x, 0, desiredDirection.z);
@@ -46,7 +51,7 @@ namespace StateOfClone.Units
             return angleDifferenceDegrees;
         }
 
-        protected override float CalculatePitch(Vector3 desiredVelocity, Vector3 currentSpeed)
+        protected override float CalculatePitch(Vector3 desiredVelocity)
         {
             // For now, we're not considering pitch, so return 0
             return 0f;

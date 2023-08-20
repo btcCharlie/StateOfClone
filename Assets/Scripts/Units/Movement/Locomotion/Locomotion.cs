@@ -10,6 +10,14 @@ namespace StateOfClone.Units
     public abstract class Locomotion : MonoBehaviour, IUnitAction
     {
         public SteeringParams SteeringParams { get; set; }
+        public Vector3 CurrentVelocity
+        {
+            get { return transform.forward * CurrentSpeedUnitPerSec; }
+        }
+        public Vector3 Forward
+        {
+            get { return transform.forward; }
+        }
 
         [SerializeField] protected float YAWCURVESCALE = 3f;
         [SerializeField] protected float SPEEDCURVESLANT = 0.1f;
