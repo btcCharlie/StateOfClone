@@ -2,11 +2,6 @@ using UnityEngine;
 
 namespace StateOfClone.Units
 {
-    public interface ISteeringBehavior
-    {
-        SteeringParams GetSteering(Vector3 position, Vector3 target);
-    }
-
     public abstract class SteeringBehavior : ISteeringBehavior
     {
         // protected Rigidbody _rb;
