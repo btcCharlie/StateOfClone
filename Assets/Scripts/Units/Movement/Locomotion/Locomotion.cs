@@ -19,9 +19,6 @@ namespace StateOfClone.Units
             get { return transform.forward; }
         }
 
-        [SerializeField] protected float YAWCURVESCALE = 3f;
-        [SerializeField] protected float SPEEDCURVESLANT = 0.1f;
-
         protected Rigidbody _rb;
         protected LayerMask _groundLayer;
         protected Unit _unit;
@@ -77,7 +74,7 @@ namespace StateOfClone.Units
             _actualMaxSpeed = _ud.MaxSpeed;
             _midTurnRate = (_ud.MaxTurnRate - _ud.MinTurnRate) / 2f + _ud.MinTurnRate;
             float expKMinMid = Mathf.Exp(
-                SPEEDCURVESLANT * (_ud.MinTurnRate - _midTurnRate)
+                _ud.SpeedCurveSlant * (_ud.MinTurnRate - _midTurnRate)
                 );
             _speedStretch =
                 2f * (_ud.MinSpeed - _ud.MaxSpeed) * expKMinMid / (expKMinMid - 1f);
@@ -118,7 +115,7 @@ namespace StateOfClone.Units
 
             return
                 (_ud.MaxSpeed - _ud.MinSpeed + _speedStretch) /
-                (1f + Mathf.Exp(-SPEEDCURVESLANT * (-turnRate + _midTurnRate))) +
+                (1f + Mathf.Exp(-_ud.SpeedCurveSlant * (-turnRate + _midTurnRate))) +
                 _ud.MinSpeed - _speedStretch / 2f;
         }
 
@@ -260,14 +257,14 @@ namespace StateOfClone.Units
                     ((_ud.MinTurnRate - _ud.MaxTurnRate) *
                     Mathf.Pow(
                         1 - yawDeviation / _ud.MaxTurnRate,
-                        YAWCURVESCALE
+                        _ud.YawCurveScale
                         )) +
                     _ud.MaxTurnRate,
                 float when yawDeviation < 0 =>
                     (_ud.MaxTurnRate - _ud.MinTurnRate) *
                     Mathf.Pow(
                         1 + yawDeviation / _ud.MaxTurnRate,
-                        YAWCURVESCALE
+                        _ud.YawCurveScale
                         ) -
                     _ud.MaxTurnRate,
                 _ => 0f,
