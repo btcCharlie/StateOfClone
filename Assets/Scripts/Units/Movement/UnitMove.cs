@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Collections;
 using System.Collections.Generic;
-using StateOfClone.Core;
 
 namespace StateOfClone.Units
 {
@@ -23,8 +21,6 @@ namespace StateOfClone.Units
         private bool _isSelected = false;
 
         private List<Vector3> _path;
-
-        private Quaternion fromRotation, toRotation;
 
         private void Awake()
         {
@@ -71,11 +67,15 @@ namespace StateOfClone.Units
             {
                 steeringParams += steering.GetSteering(_rigidbody.position, target);
             }
-            steeringParams /=
-                _actionSelector.Behaviors.Count == 0 ?
-                1f : (float)_actionSelector.Behaviors.Count;
-
-            _locomotion.SteeringParams = steeringParams;
+            if (_actionSelector.Behaviors.Count == 0)
+            {
+                Debug.LogWarning($"Unit '{gameObject.name}' does not have any steering attached");
+            }
+            else
+            {
+                steeringParams /= (float)_actionSelector.Behaviors.Count;
+                _locomotion.SteeringParams = steeringParams;
+            }
         }
 
         private void DisableIfDeselected()
