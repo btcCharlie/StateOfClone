@@ -110,7 +110,7 @@ namespace StateOfClone.Units
             _actualMaxSpeed = GetMaxSpeedAtTurnRate(CurrentAngularSpeedDegPerSec);
         }
 
-        public virtual float GetMaxSpeedAtTurnRate(float turnRate)
+        public float GetMaxSpeedAtTurnRate(float turnRate)
         {
             turnRate = Mathf.Clamp(
                 Mathf.Abs(turnRate), _ud.MinTurnRate, _ud.MaxTurnRate
@@ -130,18 +130,18 @@ namespace StateOfClone.Units
         /// Repeatedly clears the movement input until the vehicle stops,
         /// then disables to component to stop calculating new movement.
         /// </summary>
-        public virtual void StopMovement()
+        public void StopMovement()
         {
             ClearMovementInput();
             StartCoroutine(StopMovementAndDisable_Co());
         }
 
-        protected virtual void OnDisable()
+        protected void OnDisable()
         {
             ClearMovementInput();
         }
 
-        protected virtual void ClearMovementInput()
+        protected void ClearMovementInput()
         {
             CurrentSpeedUnitPerSec = 0f;
             CurrentAngularSpeedDegPerSec = 0f;
