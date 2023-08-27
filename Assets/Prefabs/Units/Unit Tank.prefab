@@ -941,7 +941,7 @@ GameObject:
   - component: {fileID: 9056106201279526766}
   - component: {fileID: 3981381912372622207}
   - component: {fileID: 2286391981109288628}
-  - component: {fileID: -3476861469447853765}
+  - component: {fileID: 5020738213189967193}
   - component: {fileID: -2829585075005166425}
   m_Layer: 8
   m_Name: Unit Tank
@@ -1014,7 +1014,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &-3476861469447853765
+--- !u!114 &5020738213189967193
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1023,15 +1023,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 7976790011760261007}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0e2d78538dfdcc4581034cfb0a5dbe6, type: 3}
+  m_Script: {fileID: 11500000, guid: 6471c2ea2d088e340a043038082750a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _airborneAltitude: 15
   _groundDetectionRange: 10
   _recentNormalsCount: 10
-  _recentSpeedsCount: 50
-  _inPlaceTurnLowerLimitDegrees: 5
-  _inPlaceTurnUpperLimitDegrees: 15
+  _recentSpeedsCount: 10
+  motionTypeSelection: 1
 --- !u!114 &-2829585075005166425
 MonoBehaviour:
   m_ObjectHideFlags: 0

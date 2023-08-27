@@ -74,7 +74,7 @@ namespace StateOfClone.Units
             else
             {
                 steeringParams /= (float)_actionSelector.Behaviors.Count;
-                _locomotion.SteeringParams = steeringParams;
+                _locomotion.Motion.SteeringParams = steeringParams;
             }
         }
 

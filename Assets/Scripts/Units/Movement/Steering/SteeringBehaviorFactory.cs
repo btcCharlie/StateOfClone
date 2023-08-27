@@ -1,5 +1,3 @@
-using StateOfClone.Core;
-
 namespace StateOfClone.Units
 {
     public static class SteeringBehaviorFactory
@@ -17,7 +15,5 @@ namespace StateOfClone.Units
         {
             return new SteeringArrival(unitData, locomotion);
         }
-
-        // Add more methods for other types of steering behaviors...
     }
 }

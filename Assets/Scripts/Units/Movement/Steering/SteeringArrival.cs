@@ -26,9 +26,9 @@ namespace StateOfClone.Units
             _pitch = CalculatePitch(desiredVelocity);
 
             float expectedYawTurnRate =
-                _locomotion.SpeedCalculator.CalculateYawTurnRate(_yaw);
+                _locomotion.Motion.SpeedCalculator.CalculateYawTurnRate(_yaw);
             float trueMaxSpeed =
-                _locomotion.SpeedCalculator.GetMaxSpeedAtTurnRate(expectedYawTurnRate);
+                _locomotion.Motion.SpeedCalculator.GetMaxSpeedAtTurnRate(expectedYawTurnRate);
 
             _speed = CalculateSpeed(desiredVelocity, trueMaxSpeed);
 

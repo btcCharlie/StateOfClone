@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace StateOfClone.Units
 {
     public interface ISpeedCalculator
