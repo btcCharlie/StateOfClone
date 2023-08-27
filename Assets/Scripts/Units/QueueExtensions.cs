@@ -24,5 +24,15 @@ namespace StateOfClone.Units
             }
             return sum;
         }
+
+        public static float Average(this Queue<float> queue)
+        {
+            return queue.Sum() / queue.Count;
+        }
+
+        public static Vector3 Average(this Queue<Vector3> queue)
+        {
+            return queue.Sum() / queue.Count;
+        }
     }
 }

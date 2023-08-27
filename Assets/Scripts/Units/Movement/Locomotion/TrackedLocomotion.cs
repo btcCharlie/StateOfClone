@@ -8,6 +8,13 @@ namespace StateOfClone.Units
         [SerializeField] private float _inPlaceTurnUpperLimitDegrees = 15f;
         private float _activeLimit;
 
+        private new void Awake()
+        {
+            base.Awake();
+
+            SpeedCalculator = new TrackedSpeedCalculator(_ud);
+        }
+
         protected override void Start()
         {
             base.Start();
@@ -32,6 +39,7 @@ namespace StateOfClone.Units
                 Mathf.Abs(CurrentSpeedUnitPerSec) < 0.1f ?
                 _inPlaceTurnLowerLimitDegrees :
                 _inPlaceTurnUpperLimitDegrees;
+            SpeedCalculator.TurnLimit = _activeLimit;
 
             _rb.rotation = newRotation;
         }
@@ -44,6 +52,13 @@ namespace StateOfClone.Units
             }
 
             return base.GetMaxSpeedAtTurnRate(turnRate);
+        }
+
+        private new void OnEnable()
+        {
+            base.OnEnable();
+
+            SpeedCalculator = new TrackedSpeedCalculator(_ud);
         }
     }
 }
