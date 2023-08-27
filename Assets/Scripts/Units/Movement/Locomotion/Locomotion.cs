@@ -22,7 +22,6 @@ namespace StateOfClone.Units
         private LayerMask _groundLayer;
         private Unit _unit;
         private UnitData _ud;
-        private float _actualMaxSpeed;
 
         [SerializeField] private float _airborneAltitude = 15f;
         [SerializeField] private float _groundDetectionRange = 10f;
@@ -60,11 +59,9 @@ namespace StateOfClone.Units
                 _rb.rotation = Quaternion.FromToRotation(
                         transform.up, hit.normal
                     ) * _rb.rotation;
+
+                _smoothingQueues.Initiliaze(hit.normal, 0f);
             }
-
-            _smoothingQueues.Initiliaze(hit.normal, 0f);
-
-            _actualMaxSpeed = _ud.MaxSpeed;
         }
 
         private void FixedUpdate()
@@ -111,6 +108,7 @@ namespace StateOfClone.Units
 
         private IEnumerator StopMovementAndDisable_Co()
         {
+            //! add a timeout or other exit in case a veicle gets stuck etc.
             WaitForFixedUpdate waitForFixedUpdate = new();
             while (_smoothingQueues.AverageSpeed() != 0f)
             {
@@ -124,6 +122,7 @@ namespace StateOfClone.Units
                 ref Vector3 newPosition, ref Quaternion newRotation, RaycastHit hit
             )
         {
+            //! break down into smaller pieces
             if (_ud.IsAirborne)
             {
                 newPosition.y = hit.point.y + _airborneAltitude;
