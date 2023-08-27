@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace StateOfClone.Units
 {
@@ -31,10 +32,12 @@ namespace StateOfClone.Units
         [SerializeField] protected float _airborneAltitude = 15f;
         [SerializeField] protected float _groundDetectionRange = 10f;
         [SerializeField] protected int _recentNormalsCount = 10;
-        protected Vector3[] _recentNormals;
+        private Queue<Vector3> _recentNormals;
+        // protected Vector3[] _recentNormals;
 
         [SerializeField] protected int _recentSpeedsCount = 5;
-        protected float[] _recentSpeeds;
+        private Queue<float> _recentSpeeds;
+        // protected float[] _recentSpeeds;
 
         public float CurrentSpeedUnitPerSec { get; protected set; }
         public float CurrentAngularSpeedDegPerSec { get; protected set; }
@@ -45,8 +48,10 @@ namespace StateOfClone.Units
             _ud = _unit.UnitData;
             _rb = GetComponent<Rigidbody>();
             _groundLayer = LayerMask.GetMask("Ground");
-            _recentNormals = new Vector3[_recentNormalsCount];
-            _recentSpeeds = new float[_recentSpeedsCount];
+            // _recentNormals = new Vector3[_recentNormalsCount];
+            // _recentSpeeds = new float[_recentSpeedsCount];
+            _recentNormals = new Queue<Vector3>();
+            _recentSpeeds = new Queue<float>();
             CurrentSpeedUnitPerSec = 0f;
             CurrentAngularSpeedDegPerSec = 0f;
         }
@@ -54,21 +59,20 @@ namespace StateOfClone.Units
         protected virtual void Start()
         {
             enabled = false;
-            if (Physics.Raycast(transform.position - Vector3.up, -Vector3.up,
-                out RaycastHit hit, _groundDetectionRange, _groundLayer))
+            if (IsOnGround(transform.position, out RaycastHit hit))
             {
-                for (int i = 0; i < _recentNormals.Length; i++)
+                for (int i = 0; i < _recentNormalsCount; i++)
                 {
-                    _recentNormals[i] = hit.normal;
+                    _recentNormals.Enqueue(hit.normal);
                 }
                 _rb.rotation = Quaternion.FromToRotation(
                     transform.up, hit.normal
                     ) * _rb.rotation;
             }
 
-            for (int i = 0; i < _recentSpeeds.Length; i++)
+            for (int i = 0; i < _recentSpeedsCount; i++)
             {
-                _recentSpeeds[i] = 0f;
+                _recentSpeeds.Enqueue(0f);
             }
 
             _actualMaxSpeed = _ud.MaxSpeed;
@@ -107,7 +111,14 @@ namespace StateOfClone.Units
             _actualMaxSpeed = GetMaxSpeedAtTurnRate(CurrentAngularSpeedDegPerSec);
         }
 
-        public float GetMaxSpeedAtTurnRate(float turnRate)
+        private bool IsOnGround(Vector3 position, out RaycastHit hit)
+        {
+            return Physics.Raycast(
+                position + (Vector3.up * _groundDetectionRange), Vector3.down,
+                out hit, 2 * _groundDetectionRange, _groundLayer);
+        }
+
+        public virtual float GetMaxSpeedAtTurnRate(float turnRate)
         {
             turnRate = Mathf.Clamp(
                 Mathf.Abs(turnRate), _ud.MinTurnRate, _ud.MaxTurnRate
@@ -159,21 +170,21 @@ namespace StateOfClone.Units
         protected Vector3 GetNormalMovingAverage()
         {
             Vector3 sum = Vector3.zero;
-            for (int i = 0; i < _recentNormals.Length; i++)
+            foreach (Vector3 normal in _recentNormals)
             {
-                sum += _recentNormals[i];
+                sum += normal;
             }
-            return sum / _recentNormals.Length;
+            return _recentNormals.Count > 0 ? (sum / _recentNormals.Count) : Vector3.zero;
         }
 
         protected float GetSpeedMovingAverage()
         {
             float sum = 0f;
-            for (int i = 0; i < _recentSpeeds.Length; i++)
+            foreach (float speed in _recentSpeeds)
             {
-                sum += _recentSpeeds[i];
+                sum += speed;
             }
-            return sum / _recentSpeeds.Length;
+            return _recentSpeeds.Count > 0 ? (sum / _recentSpeeds.Count) : 0f;
         }
 
         /// <summary>
@@ -183,11 +194,11 @@ namespace StateOfClone.Units
         /// <param name="newNormal">The new normal to add</param>
         protected void AddNewNormal(Vector3 newNormal)
         {
-            for (int i = 0; i < _recentNormals.Length - 1; i++)
+            if (_recentNormals.Count != 0)
             {
-                _recentNormals[i] = _recentNormals[i + 1];
+                _recentNormals.Dequeue();
             }
-            _recentNormals[^1] = newNormal;
+            _recentNormals.Enqueue(newNormal);
         }
 
         /// <summary>
@@ -199,11 +210,11 @@ namespace StateOfClone.Units
         /// <param name="newSpeed">The new speed to add</param>
         protected void AddNewSpeed(float newSpeed)
         {
-            for (int i = 0; i < _recentSpeeds.Length - 1; i++)
+            if (_recentSpeeds.Count != 0)
             {
-                _recentSpeeds[i] = _recentSpeeds[i + 1];
+                _recentSpeeds.Dequeue();
             }
-            _recentSpeeds[^1] = newSpeed;
+            _recentSpeeds.Enqueue(newSpeed);
         }
 
         protected virtual void UpdateElevationAndNormal(
