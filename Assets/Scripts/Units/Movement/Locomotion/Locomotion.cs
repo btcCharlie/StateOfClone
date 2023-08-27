@@ -33,11 +33,9 @@ namespace StateOfClone.Units
         [SerializeField] protected float _groundDetectionRange = 10f;
         [SerializeField] protected int _recentNormalsCount = 10;
         private Queue<Vector3> _recentNormals;
-        // protected Vector3[] _recentNormals;
 
         [SerializeField] protected int _recentSpeedsCount = 5;
         private Queue<float> _recentSpeeds;
-        // protected float[] _recentSpeeds;
 
         public float CurrentSpeedUnitPerSec { get; protected set; }
         public float CurrentAngularSpeedDegPerSec { get; protected set; }
@@ -48,8 +46,6 @@ namespace StateOfClone.Units
             _ud = _unit.UnitData;
             _rb = GetComponent<Rigidbody>();
             _groundLayer = LayerMask.GetMask("Ground");
-            // _recentNormals = new Vector3[_recentNormalsCount];
-            // _recentSpeeds = new float[_recentSpeedsCount];
             _recentNormals = new Queue<Vector3>();
             _recentSpeeds = new Queue<float>();
             CurrentSpeedUnitPerSec = 0f;
@@ -97,10 +93,7 @@ namespace StateOfClone.Units
                 ) * _rb.rotation;
 
             // Make sure the vehicle sits flush on the ground
-            if (Physics.Raycast(
-                newPosition + (Vector3.up * _groundDetectionRange), Vector3.down,
-                out RaycastHit hit, 2 * _groundDetectionRange, _groundLayer
-                ))
+            if (IsOnGround(newPosition, out RaycastHit hit))
             {
                 UpdateElevationAndNormal(ref newPosition, ref newRotation, hit);
             }
@@ -169,22 +162,16 @@ namespace StateOfClone.Units
 
         protected Vector3 GetNormalMovingAverage()
         {
-            Vector3 sum = Vector3.zero;
-            foreach (Vector3 normal in _recentNormals)
-            {
-                sum += normal;
-            }
-            return _recentNormals.Count > 0 ? (sum / _recentNormals.Count) : Vector3.zero;
+            return
+                _recentNormals.Count > 0 ?
+                (_recentNormals.Sum() / _recentNormals.Count) : Vector3.zero;
         }
 
         protected float GetSpeedMovingAverage()
         {
-            float sum = 0f;
-            foreach (float speed in _recentSpeeds)
-            {
-                sum += speed;
-            }
-            return _recentSpeeds.Count > 0 ? (sum / _recentSpeeds.Count) : 0f;
+            return
+                _recentSpeeds.Count > 0 ?
+                (_recentSpeeds.Sum() / _recentSpeeds.Count) : 0f;
         }
 
         /// <summary>
