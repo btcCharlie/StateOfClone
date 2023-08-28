@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections;
 
 namespace StateOfClone.Units
@@ -9,21 +10,11 @@ namespace StateOfClone.Units
     [RequireComponent(typeof(Unit))]
     public class Locomotion : MonoBehaviour
     {
-        public Vector3 CurrentVelocity
-        {
-            get { return transform.forward * Motion.CurrentSpeedUnitPerSec; }
-        }
-        public Vector3 Forward
-        {
-            get { return transform.forward; }
-        }
-
         private Rigidbody _rb;
         private LayerMask _groundLayer;
         private Unit _unit;
         private UnitData _ud;
 
-        // [SerializeField] private float _airborneAltitude = 15f;
         [SerializeField] private float _groundDetectionRange = 10f;
         [SerializeField] private int _recentNormalsCount = 10;
         [SerializeField] private int _recentSpeedsCount = 5;
@@ -39,7 +30,8 @@ namespace StateOfClone.Units
         private void Awake()
         {
             _unit = GetComponent<Unit>();
-            _ud = _unit.UnitData;
+            _ud = _unit ? _unit.UnitData :
+                throw new Exception("Unit component missing or UnitData is null");
             _rb = GetComponent<Rigidbody>();
             _groundLayer = LayerMask.GetMask("Ground");
             _smoothingQueues = new SmoothingAverageQueue(
