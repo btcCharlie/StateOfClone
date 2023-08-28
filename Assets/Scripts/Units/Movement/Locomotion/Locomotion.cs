@@ -142,6 +142,11 @@ namespace StateOfClone.Units
 
         private void OnDrawGizmos()
         {
+            if (Motion == null)
+            {
+                return;
+            }
+
             Vector3 from = transform.position + Vector3.up * 3f;
             Color ogColor = Gizmos.color;
 

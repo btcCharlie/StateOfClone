@@ -11,10 +11,10 @@ namespace StateOfClone.Units
             SteeringType = SteeringType.Seek;
         }
 
-        public override SteeringParams GetSteering(Vector3 position, Vector3 target)
+        public override SteeringParams GetSteering(Vector3 position, TargetInfo target)
         {
             Vector3 desiredVelocity =
-                (target - position).normalized * _ud.MaxSpeed;
+                (target.Position - position).normalized * _ud.MaxSpeed;
 
             _yaw = CalculateYaw(desiredVelocity);
             _pitch = CalculatePitch(desiredVelocity);

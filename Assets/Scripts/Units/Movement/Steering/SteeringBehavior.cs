@@ -15,7 +15,7 @@ namespace StateOfClone.Units
             _locomotion = locomotion;
         }
 
-        public abstract SteeringParams GetSteering(Vector3 position, Vector3 target);
+        public abstract SteeringParams GetSteering(Vector3 position, TargetInfo target);
 
         /// <summary>
         /// Calculate the angle difference between the current and 

@@ -7,12 +7,14 @@ namespace StateOfClone.Units
         public float Yaw { get; set; }
         public float Pitch { get; set; }
         public float Speed { get; set; }
+        public Vector3 Target { get; set; }
 
         public SteeringParams(float yaw, float speed)
         {
             Yaw = yaw;
             Pitch = 0f;
             Speed = speed;
+            Target = Vector3.zero;
         }
 
         public SteeringParams(float yaw, float pitch, float speed)
@@ -20,6 +22,23 @@ namespace StateOfClone.Units
             Yaw = yaw;
             Pitch = pitch;
             Speed = speed;
+            Target = Vector3.zero;
+        }
+
+        public SteeringParams(float yaw, float speed, Vector3 target)
+        {
+            Yaw = yaw;
+            Pitch = 0f;
+            Speed = speed;
+            Target = target;
+        }
+
+        public SteeringParams(float yaw, float pitch, float speed, Vector3 target)
+        {
+            Yaw = yaw;
+            Pitch = pitch;
+            Speed = speed;
+            Target = target;
         }
 
         public static SteeringParams Zero => new(0f, 0f, 0f);

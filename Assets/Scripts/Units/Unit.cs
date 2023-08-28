@@ -6,7 +6,8 @@ using StateOfClone.Core;
 
 namespace StateOfClone.Units
 {
-    public class Unit : MonoBehaviour, IHexUnit, ISelectable
+    [RequireComponent(typeof(UnitMove))]
+    public class Unit : MonoBehaviour, IHexUnit, ISelectable, IMoveable
     {
         public IHexGrid Grid { get; set; }
         public IHexCell Location { get; set; }
@@ -23,6 +24,8 @@ namespace StateOfClone.Units
         public UnityEvent OnSelected { get; set; }
         public UnityEvent OnDeselected { get; set; }
 
+        public UnitMove UnitMove { get; private set; }
+
         private void Awake()
         {
             _body = transform.GetChild(0);
@@ -30,6 +33,8 @@ namespace StateOfClone.Units
 
             OnSelected ??= new UnityEvent();
             OnDeselected ??= new UnityEvent();
+
+            UnitMove = GetComponent<UnitMove>();
         }
 
         private void Start()
@@ -78,4 +83,5 @@ namespace StateOfClone.Units
             _turret.LookAt(point);
         }
     }
+
 }

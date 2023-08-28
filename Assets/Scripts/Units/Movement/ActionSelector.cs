@@ -14,45 +14,17 @@ namespace StateOfClone.Units
 
         private Unit _unit;
         private Locomotion _locomotion;
-        private ISteeringBehavior _currentBehavior;
         private readonly List<ISteeringBehavior> _steeringBehaviors = new();
 
-        private List<Vector3> _path;
         public List<ISteeringBehavior> Behaviors
         {
             get { return _steeringBehaviors; }
-        }
-
-        public ISteeringBehavior CurrentBehavior
-        {
-            get { return _currentBehavior; }
         }
 
         private void Awake()
         {
             _unit = GetComponent<Unit>();
             _locomotion = GetComponent<Locomotion>();
-
-            _path = new List<Vector3>();
-        }
-
-        private void FixedUpdate()
-        {
-        }
-
-        public void SetBehavior(ISteeringBehavior newBehavior)
-        {
-            _currentBehavior = newBehavior;
-        }
-
-        public void AddWaypoint(Vector3 newWaypoint)
-        {
-            _path.Add(newWaypoint);
-        }
-
-        public void ClearPath()
-        {
-            _path.Clear();
         }
 
         public void AddBehavior(ISteeringBehavior behavior)

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using StateOfClone.Core;
 
 namespace StateOfClone.Units
 {
@@ -20,7 +21,9 @@ namespace StateOfClone.Units
 
         private bool _isSelected = false;
 
-        private List<Vector3> _path;
+        private List<TargetInfo> _movementTargets;
+
+        private Vector3 _targetGizmo = Vector3.zero;
 
         private void Awake()
         {
@@ -31,7 +34,7 @@ namespace StateOfClone.Units
             _locomotion = GetComponent<Locomotion>();
             _actionSelector = GetComponent<ActionSelector>();
 
-            _path = new List<Vector3>();
+            _movementTargets = new List<TargetInfo>();
         }
 
         private void Start()
@@ -46,7 +49,7 @@ namespace StateOfClone.Units
 
         private void FixedUpdate()
         {
-            if (_path == null || _path.Count == 0)
+            if (_movementTargets == null || _movementTargets.Count == 0)
             {
                 DisableIfDeselected();
                 _locomotion.StopMovement();
@@ -54,11 +57,11 @@ namespace StateOfClone.Units
             }
             _locomotion.enabled = true;
 
-            Vector3 target = _path[^1];
-            if (Vector3.Distance(_rigidbody.position, target) < 0.5f)
+            TargetInfo target = _movementTargets[^1];
+            if (Vector3.Distance(_rigidbody.position, target.Position) < 0.5f)
             {
                 Debug.Log("Reached target");
-                _path.RemoveAt(_path.Count - 1);
+                _movementTargets.RemoveAt(_movementTargets.Count - 1);
                 return;
             }
 
@@ -66,6 +69,7 @@ namespace StateOfClone.Units
             foreach (SteeringBehavior steering in _actionSelector.Behaviors)
             {
                 steeringParams += steering.GetSteering(_rigidbody.position, target);
+                _targetGizmo = steeringParams.Target;
             }
             if (_actionSelector.Behaviors.Count == 0)
             {
@@ -105,19 +109,40 @@ namespace StateOfClone.Units
         private void OnUnitMove(InputAction.CallbackContext context)
         {
             Ray ray = _camera.ScreenPointToRay(Mouse.current.position.ReadValue());
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _groundLayer))
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity))
             {
-                _path.Clear();
-                //! this should first calculate waypoints to the target, putting in 
-                //! the target for simplicity
-                _path.Add(hit.point);
+                // Detect if the hit object is selectable
+                ISelectable selectable = hitInfo.collider.GetComponent<ISelectable>();
+                Debug.Log($"Hit collider '{hitInfo.collider.name}'");
+                Debug.Log($"Hit transform '{hitInfo.transform.name}'");
+                Debug.Log($"Selectable: '{selectable}'");
+
+                if (selectable != null)
+                {
+                    // Handle selectable object logic here
+                    _movementTargets.Clear();
+                    _movementTargets.Add(new TargetInfo(hitInfo.transform));
+                    return;
+                }
+
+                // If not selectable, try to find the ground
+                if (Physics.Raycast(ray, out RaycastHit groundHitInfo, hitInfo.distance + 10f, _groundLayer))
+                {
+                    _movementTargets.Clear();
+                    //! this should first calculate waypoints to the target
+                    //! putting in the target for simplicity
+                    _movementTargets.Add(new TargetInfo(groundHitInfo.point));
+                }
             }
         }
 
         private void OnDrawGizmos()
         {
-            if (_path == null || _path.Count == 0)
+            if (_movementTargets == null || _movementTargets.Count == 0)
                 return;
+
+
 
             // draw the waypoints from path as small red spheres with the 
             // currently active waypoint (the last one) as a larger red sphere
@@ -126,13 +151,25 @@ namespace StateOfClone.Units
             Color prevColor = Gizmos.color;
             Gizmos.color = Color.green;
             Vector3 offset = Vector3.up;
-            for (int i = 0; i < _path.Count - 1; i++)
+            for (int i = 0; i < _movementTargets.Count - 1; i++)
             {
-                Gizmos.DrawSphere(_path[i] + offset, 0.5f);
-                Gizmos.DrawLine(_path[i] + offset, _path[i + 1] + offset);
+                Vector3 start = _movementTargets[i].Type switch
+                {
+                    TargetType.Ground => _movementTargets[i].Position,
+                    TargetType.Selectable => _movementTargets[i].Transform.position,
+                    _ => Vector3.zero
+                };
+                Vector3 stopNext = _movementTargets[i + 1].Type switch
+                {
+                    TargetType.Ground => _movementTargets[i + 1].Position,
+                    TargetType.Selectable => _movementTargets[i + 1].Transform.position,
+                    _ => Vector3.zero
+                };
+                Gizmos.DrawSphere(start + offset, 0.5f);
+                Gizmos.DrawLine(start + offset, stopNext + offset);
             }
-            Gizmos.DrawSphere(_path[^1] + offset, 1f);
-            Gizmos.DrawLine(transform.position + offset, _path[^1] + offset);
+            Gizmos.DrawSphere(_targetGizmo + offset, 1f);
+            Gizmos.DrawLine(transform.position + offset, _targetGizmo + offset);
             Gizmos.color = prevColor;
         }
     }
