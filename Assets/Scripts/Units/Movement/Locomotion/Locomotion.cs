@@ -23,7 +23,7 @@ namespace StateOfClone.Units
         private Unit _unit;
         private UnitData _ud;
 
-        [SerializeField] private float _airborneAltitude = 15f;
+        // [SerializeField] private float _airborneAltitude = 15f;
         [SerializeField] private float _groundDetectionRange = 10f;
         [SerializeField] private int _recentNormalsCount = 10;
         [SerializeField] private int _recentSpeedsCount = 5;
@@ -76,10 +76,14 @@ namespace StateOfClone.Units
                     0f, Motion.CurrentAngularSpeedDegPerSec * Time.fixedDeltaTime, 0f
                 ) * _rb.rotation;
 
-            // Make sure the vehicle sits flush on the ground
             if (IsOnGround(newPosition, out RaycastHit hit))
             {
-                UpdateElevationAndNormal(ref newPosition, ref newRotation, hit);
+                newPosition = Motion.GetElevation(newPosition, hit);
+
+                _smoothingQueues.AddNewNormal(Motion.GetNormal(transform.up, hit));
+                newRotation = Quaternion.FromToRotation(
+                        transform.up, _smoothingQueues.AverageNormal()
+                    ) * newRotation;
             }
 
             _rb.position = Motion.ApplyPosition(_rb.position, newPosition);
@@ -108,33 +112,22 @@ namespace StateOfClone.Units
 
         private IEnumerator StopMovementAndDisable_Co()
         {
-            //! add a timeout or other exit in case a veicle gets stuck etc.
             WaitForFixedUpdate waitForFixedUpdate = new();
+            float startTime = Time.time;
+            float coroutineTimeoutSeconds = 5f;
+
             while (_smoothingQueues.AverageSpeed() != 0f)
             {
+                if (Time.time - startTime > coroutineTimeoutSeconds)
+                {
+                    Debug.LogWarning($"Unit '{gameObject.name}' exceeded stop movement timeout");
+                    break;
+                }
+
                 Motion.ClearSpeeds();
                 yield return waitForFixedUpdate;
             }
             enabled = false;
-        }
-
-        private void UpdateElevationAndNormal(
-                ref Vector3 newPosition, ref Quaternion newRotation, RaycastHit hit
-            )
-        {
-            //! break down into smaller pieces
-            if (_ud.IsAirborne)
-            {
-                newPosition.y = hit.point.y + _airborneAltitude;
-            }
-            else
-            {
-                newPosition.y = hit.point.y;
-                _smoothingQueues.AddNewNormal(hit.normal);
-                newRotation = Quaternion.FromToRotation(
-                        transform.up, _smoothingQueues.AverageNormal()
-                    ) * newRotation;
-            }
         }
 
         private void OnEnable()

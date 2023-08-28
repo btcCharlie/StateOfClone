@@ -17,16 +17,6 @@ namespace StateOfClone.Units
             _actualMaxSpeed = unitData.MaxSpeed;
         }
 
-        public Vector3 ApplyPosition(Vector3 oldPosition, Vector3 newPosition)
-        {
-            return newPosition;
-        }
-
-        public Quaternion ApplyRotation(Quaternion oldRotation, Quaternion newRotation)
-        {
-            return newRotation;
-        }
-
         public void UpdateMaxSpeed()
         {
             _actualMaxSpeed = SpeedCalculator.GetMaxSpeedAtTurnRate(
