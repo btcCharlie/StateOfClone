@@ -9,6 +9,7 @@ namespace StateOfClone.Units
 
         public SteeringArrival(UnitData ud, Locomotion locomotion) : base(ud, locomotion)
         {
+            SteeringType = SteeringType.Arrival;
         }
 
         public override SteeringParams GetSteering(Vector3 position, Vector3 target)

@@ -2,19 +2,19 @@ using UnityEngine;
 
 namespace StateOfClone.Units
 {
-    public class SteeringSeek : SteeringBehavior, ISteeringBehavior
+    public class SteeringFlee : SteeringBehavior, ISteeringBehavior
     {
         private float _yaw, _pitch, _speed;
 
-        public SteeringSeek(UnitData ud, Locomotion locomotion) : base(ud, locomotion)
+        public SteeringFlee(UnitData ud, Locomotion locomotion) : base(ud, locomotion)
         {
-            SteeringType = SteeringType.Seek;
+            SteeringType = SteeringType.Flee;
         }
 
         public override SteeringParams GetSteering(Vector3 position, Vector3 target)
         {
             Vector3 desiredVelocity =
-                (target - position).normalized * _ud.MaxSpeed;
+                (position - target).normalized * _ud.MaxSpeed;
 
             _yaw = CalculateYaw(desiredVelocity);
             _pitch = CalculatePitch(desiredVelocity);
@@ -51,7 +51,6 @@ namespace StateOfClone.Units
 
         protected override float CalculatePitch(Vector3 desiredVelocity)
         {
-            // For now, we're not considering pitch, so return 0
             return 0f;
         }
 

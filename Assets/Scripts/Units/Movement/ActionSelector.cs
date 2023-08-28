@@ -15,12 +15,12 @@ namespace StateOfClone.Units
         private Unit _unit;
         private Locomotion _locomotion;
         private ISteeringBehavior _currentBehavior;
-        private readonly List<ISteeringBehavior> _behaviors = new();
+        private readonly List<ISteeringBehavior> _steeringBehaviors = new();
 
         private List<Vector3> _path;
         public List<ISteeringBehavior> Behaviors
         {
-            get { return _behaviors; }
+            get { return _steeringBehaviors; }
         }
 
         public ISteeringBehavior CurrentBehavior
@@ -57,61 +57,70 @@ namespace StateOfClone.Units
 
         public void AddBehavior(ISteeringBehavior behavior)
         {
-            _behaviors.Add(behavior);
+            _steeringBehaviors.Add(behavior);
         }
 
-        public void AddBehavior(string behaviorType)
+        public void AddBehavior(SteeringType steeringType)
         {
-            ISteeringBehavior newBehavior = null;
+            ISteeringBehavior newSteering = null;
 
 #if UNITY_EDITOR
             _unit = GetComponent<Unit>();
             _locomotion = GetComponent<Locomotion>();
 #endif
 
-            switch (behaviorType)
-            {
-                case "SteeringSeek":
-                    newBehavior = SteeringBehaviorFactory.CreateSteeringSeek(
-                        _unit.UnitData, _locomotion
-                        );
-                    break;
-                case "SteeringArrival":
-                    newBehavior = SteeringBehaviorFactory.CreateSteeringArrival(
-                        _unit.UnitData, _locomotion
-                        );
-                    break;
-                    // Add more cases for other types of steering behaviors...
-            }
+            newSteering = SteeringBehaviorFactory.CreateBehavior(
+                steeringType, _unit.UnitData, _locomotion
+            );
 
-            if (newBehavior == null)
+            if (newSteering == null)
             {
                 return;
             }
 
-            _behaviors.Add(newBehavior);
+            _steeringBehaviors.Add(newSteering);
         }
 
-        public bool RemoveBehavior(ISteeringBehavior behavior)
+        public bool RemoveBehavior(ISteeringBehavior steering)
         {
-            return _behaviors.Remove(behavior);
+            return _steeringBehaviors.Remove(steering);
         }
 
         public bool RemoveBehavior(string behaviorType)
         {
-            ISteeringBehavior behaviorToRemove = default(SteeringBehavior);
-            foreach (ISteeringBehavior behavior in _behaviors)
+            ISteeringBehavior steeringToRemove = default(SteeringBehavior);
+            foreach (ISteeringBehavior behavior in _steeringBehaviors)
             {
                 if (behavior.GetType().Name == behaviorType)
                 {
-                    behaviorToRemove = behavior;
+                    steeringToRemove = behavior;
                     break;
                 }
             }
 
-            if (behaviorToRemove != default(SteeringBehavior))
+            if (steeringToRemove != default(SteeringBehavior))
             {
-                return _behaviors.Remove(behaviorToRemove);
+                return _steeringBehaviors.Remove(steeringToRemove);
+            }
+
+            return false;
+        }
+
+        public bool RemoveBehavior(SteeringType steeringType)
+        {
+            ISteeringBehavior steeringToRemove = default(SteeringBehavior);
+            foreach (ISteeringBehavior steering in _steeringBehaviors)
+            {
+                if (steering.SteeringType == steeringType)
+                {
+                    steeringToRemove = steering;
+                    break;
+                }
+            }
+
+            if (steeringToRemove != default(SteeringBehavior))
+            {
+                return _steeringBehaviors.Remove(steeringToRemove);
             }
 
             return false;
