@@ -46,7 +46,8 @@ namespace StateOfClone.Units
             UnitData unitData, Locomotion locomotion
             )
         {
-            return new SteeringPursuit(unitData, locomotion);
+            LinearSteeringPredictor predictor = new(0.5f);
+            return new SteeringPursuit(unitData, locomotion, predictor);
         }
 
         public static ISteeringBehavior CreateSteeringArrival(

@@ -49,7 +49,7 @@ namespace StateOfClone.Units
         public static SteeringParams operator +(SteeringParams a, SteeringParams b)
         {
             return new SteeringParams(
-                a.Yaw + b.Yaw, a.Pitch + b.Pitch, a.Speed + b.Speed
+                a.Yaw + b.Yaw, a.Pitch + b.Pitch, a.Speed + b.Speed, a.Target + b.Target
                 );
         }
 
@@ -59,7 +59,7 @@ namespace StateOfClone.Units
         public static SteeringParams operator /(SteeringParams a, float value)
         {
             return new SteeringParams(
-                a.Yaw / value, a.Pitch / value, a.Speed / value
+                a.Yaw / value, a.Pitch / value, a.Speed / value, a.Target / value
                 );
         }
     }

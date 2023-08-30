@@ -26,7 +26,7 @@ namespace StateOfClone.Units
 
             _speed = CalculateSpeed(desiredVelocity, trueMaxSpeed);
 
-            return new SteeringParams(_yaw, _pitch, _speed);
+            return new SteeringParams(_yaw, _pitch, _speed, target.Position);
         }
 
         protected override float CalculateYaw(Vector3 desiredVelocity)

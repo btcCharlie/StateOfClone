@@ -142,8 +142,6 @@ namespace StateOfClone.Units
             if (_movementTargets == null || _movementTargets.Count == 0)
                 return;
 
-
-
             // draw the waypoints from path as small red spheres with the 
             // currently active waypoint (the last one) as a larger red sphere
             // also, draw a line between the waypoints, ending at the transform's
