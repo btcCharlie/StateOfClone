@@ -14,6 +14,7 @@ namespace StateOfClone.Units
         public float Orientation { get; set; }
 
         public int Speed => (int)UnitData.MaxSpeed;
+        public float CurrentSpeed => UnitMove.CurrentSpeed;
 
         public int VisionRange => UnitData.VisionRange;
 

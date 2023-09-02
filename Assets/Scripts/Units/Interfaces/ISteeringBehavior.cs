@@ -6,6 +6,6 @@ namespace StateOfClone.Units
     {
         SteeringType SteeringType { get; }
 
-        SteeringParams GetSteering(Vector3 position, TargetInfo target);
+        SteeringParams GetSteering(SelectionInfo self, SelectionInfo target);
     }
 }

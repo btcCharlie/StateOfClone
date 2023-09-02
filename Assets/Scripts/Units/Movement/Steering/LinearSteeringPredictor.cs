@@ -11,10 +11,10 @@ namespace StateOfClone.Units
             _turningParam = turningParam;
         }
 
-        public TargetInfo PredictPosition(Vector3 position, TargetInfo target)
+        public SelectionInfo PredictPosition(SelectionInfo self, SelectionInfo target)
         {
             float distance = Vector3.Distance(
-                position, target.Transform.position
+                self.Position, target.Transform.position
                 );
             float timeToInterception = EstimateTimeToInterception(distance);
 
@@ -23,7 +23,7 @@ namespace StateOfClone.Units
             );
             targetHeading = targetHeading.normalized;
 
-            return new TargetInfo(
+            return new SelectionInfo(
                 target.Transform.position + targetHeading * timeToInterception
                 );
         }

@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace StateOfClone.Units
 {
     public class SteeringPursuit : SteeringSeek, ISteeringBehavior
@@ -14,15 +12,15 @@ namespace StateOfClone.Units
             SteeringType = SteeringType.Pursuit;
         }
 
-        public override SteeringParams GetSteering(Vector3 position, TargetInfo target)
+        public override SteeringParams GetSteering(SelectionInfo self, SelectionInfo target)
         {
             target = target.Type switch
             {
-                TargetType.Selectable => _predictor.PredictPosition(position, target),
+                SelectionType.Moveable => _predictor.PredictPosition(self, target),
                 _ => target
             };
 
-            SteeringParams sp = base.GetSteering(position, target);
+            SteeringParams sp = base.GetSteering(self, target);
             sp.Target = target.Position;
             return sp;
         }

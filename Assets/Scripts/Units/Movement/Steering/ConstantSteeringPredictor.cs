@@ -11,14 +11,14 @@ namespace StateOfClone.Units
             _headingOffset = headingOffset;
         }
 
-        public TargetInfo PredictPosition(Vector3 position, TargetInfo target)
+        public SelectionInfo PredictPosition(SelectionInfo self, SelectionInfo target)
         {
             Vector3 targetHeading = new(
                 target.Transform.forward.x, 0f, target.Transform.forward.z
             );
             targetHeading = targetHeading.normalized;
 
-            return new TargetInfo(
+            return new SelectionInfo(
                 target.Transform.position + targetHeading * _headingOffset
                 );
         }

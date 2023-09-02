@@ -4,6 +4,6 @@ namespace StateOfClone.Units
 {
     public interface ISteeringPredictor
     {
-        TargetInfo PredictPosition(Vector3 position, TargetInfo target);
+        SelectionInfo PredictPosition(SelectionInfo self, SelectionInfo target);
     }
 }

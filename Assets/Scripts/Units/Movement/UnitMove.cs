@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
-using StateOfClone.Core;
+using System.Linq;
 
 namespace StateOfClone.Units
 {
     public class UnitMove : MonoBehaviour, IUnitAction
     {
+        public float CurrentSpeed => _locomotion.Motion.CurrentSpeedUnitPerSec;
         [SerializeField] private LayerMask _groundLayer;
 
         private PlayerInput _playerInput;
@@ -21,7 +22,7 @@ namespace StateOfClone.Units
 
         private bool _isSelected = false;
 
-        private List<TargetInfo> _movementTargets;
+        private List<SelectionInfo> _movementTargets;
 
         private Vector3 _targetGizmo = Vector3.zero;
 
@@ -34,7 +35,7 @@ namespace StateOfClone.Units
             _locomotion = GetComponent<Locomotion>();
             _actionSelector = GetComponent<ActionSelector>();
 
-            _movementTargets = new List<TargetInfo>();
+            _movementTargets = new List<SelectionInfo>();
         }
 
         private void Start()
@@ -57,7 +58,7 @@ namespace StateOfClone.Units
             }
             _locomotion.enabled = true;
 
-            TargetInfo target = _movementTargets[^1];
+            SelectionInfo target = _movementTargets[^1];
             if (Vector3.Distance(_rigidbody.position, target.Position) < 0.5f)
             {
                 Debug.Log("Reached target");
@@ -66,9 +67,10 @@ namespace StateOfClone.Units
             }
 
             SteeringParams steeringParams = SteeringParams.Zero;
-            foreach (SteeringBehavior steering in _actionSelector.Behaviors)
+            SelectionInfo self = new(transform, CurrentSpeed);
+            foreach (SteeringBehavior steering in _actionSelector.Behaviors.Cast<SteeringBehavior>())
             {
-                steeringParams += steering.GetSteering(_rigidbody.position, target);
+                steeringParams += steering.GetSteering(self, target);
                 _targetGizmo = steeringParams.Target;
             }
             if (_actionSelector.Behaviors.Count == 0)
@@ -113,16 +115,16 @@ namespace StateOfClone.Units
             if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity))
             {
                 // Detect if the hit object is selectable
-                ISelectable selectable = hitInfo.collider.GetComponent<ISelectable>();
-                Debug.Log($"Hit collider '{hitInfo.collider.name}'");
-                Debug.Log($"Hit transform '{hitInfo.transform.name}'");
-                Debug.Log($"Selectable: '{selectable}'");
-
-                if (selectable != null)
+                // Debug.Log($"Hit collider '{hitInfo.collider.name}'");
+                // Debug.Log($"Hit transform '{hitInfo.transform.name}'");
+                // Debug.Log($"Selectable: '{selectable}'");
+                if (hitInfo.collider.TryGetComponent<IMoveable>(out var moveable))
                 {
                     // Handle selectable object logic here
                     _movementTargets.Clear();
-                    _movementTargets.Add(new TargetInfo(hitInfo.transform));
+                    _movementTargets.Add(
+                        new SelectionInfo(hitInfo.transform, moveable.CurrentSpeed)
+                        );
                     return;
                 }
 
@@ -132,7 +134,7 @@ namespace StateOfClone.Units
                     _movementTargets.Clear();
                     //! this should first calculate waypoints to the target
                     //! putting in the target for simplicity
-                    _movementTargets.Add(new TargetInfo(groundHitInfo.point));
+                    _movementTargets.Add(new SelectionInfo(groundHitInfo.point));
                 }
             }
         }
@@ -153,14 +155,14 @@ namespace StateOfClone.Units
             {
                 Vector3 start = _movementTargets[i].Type switch
                 {
-                    TargetType.Ground => _movementTargets[i].Position,
-                    TargetType.Selectable => _movementTargets[i].Transform.position,
+                    SelectionType.Ground => _movementTargets[i].Position,
+                    SelectionType.Moveable => _movementTargets[i].Transform.position,
                     _ => Vector3.zero
                 };
                 Vector3 stopNext = _movementTargets[i + 1].Type switch
                 {
-                    TargetType.Ground => _movementTargets[i + 1].Position,
-                    TargetType.Selectable => _movementTargets[i + 1].Transform.position,
+                    SelectionType.Ground => _movementTargets[i + 1].Position,
+                    SelectionType.Moveable => _movementTargets[i + 1].Transform.position,
                     _ => Vector3.zero
                 };
                 Gizmos.DrawSphere(start + offset, 0.5f);

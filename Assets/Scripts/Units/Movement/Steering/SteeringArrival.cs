@@ -12,10 +12,10 @@ namespace StateOfClone.Units
             SteeringType = SteeringType.Arrival;
         }
 
-        public override SteeringParams GetSteering(Vector3 position, TargetInfo target)
+        public override SteeringParams GetSteering(SelectionInfo self, SelectionInfo target)
         {
             // Calculate the desired velocity
-            Vector3 direction = target.Position - position;
+            Vector3 direction = target.Position - self.Position;
             float distance = direction.magnitude;
             float speed =
                 (distance < slowingDistance) ?
