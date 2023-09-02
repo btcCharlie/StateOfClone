@@ -38,7 +38,11 @@ namespace StateOfClone.Units
             _unit = GetComponent<Unit>();
             _locomotion = GetComponent<Locomotion>();
 #endif
-            if (steeringType == SteeringType.Pursuit)
+
+            if (
+                steeringType == SteeringType.Pursuit ||
+                steeringType == SteeringType.Evasion
+                )
             {
                 HeadingSteeringPredictor predictor = new(
                     0.5f, _unit.UnitData.MaxSpeed

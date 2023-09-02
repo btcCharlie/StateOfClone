@@ -51,7 +51,6 @@ namespace StateOfClone.Units
 
         protected override float CalculatePitch(Vector3 desiredVelocity)
         {
-            // For now, we're not considering pitch, so return 0
             return 0f;
         }
 
