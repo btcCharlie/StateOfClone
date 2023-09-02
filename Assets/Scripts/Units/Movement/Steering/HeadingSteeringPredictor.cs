@@ -5,36 +5,61 @@ namespace StateOfClone.Units
     public class HeadingSteeringPredictor : ISteeringPredictor
     {
         private float _turningParam;
+        private float _maxSpeed;
 
-        public HeadingSteeringPredictor(float turningParam)
+        public HeadingSteeringPredictor(float turningParam, float maxSpeed)
         {
             _turningParam = turningParam;
+            if (maxSpeed == 0f)
+            {
+                _maxSpeed = 1f;
+            }
+            else
+            {
+                _maxSpeed = maxSpeed;
+            }
         }
 
         public SelectionInfo PredictPosition(SelectionInfo self, SelectionInfo target)
         {
+            Transform selfTransform = self.Moveable.transform;
+            Transform targetTransform = target.Moveable.transform;
+
             float relativeHeading = Vector3.Dot(
-                self.Transform.forward, target.Transform.forward
+                selfTransform.forward, targetTransform.forward
                 );
             float relativePosition = Vector3.Dot(
-                target.Transform.forward,
-                (self.Transform.position - target.Transform.position).normalized
+                targetTransform.forward,
+                (selfTransform.position - targetTransform.position).normalized
             );
             float distance = Vector3.Distance(
-                self.Position, target.Transform.position
+                selfTransform.position, targetTransform.position
                 );
             float timeToInterception = EstimateTimeToInterception(
                 relativeHeading, relativePosition, distance)
                 ;
             Debug.Log($"Heading: {relativeHeading}; Position: {relativePosition}; Distance: {distance}; Time: {timeToInterception}");
 
-            Vector3 targetHeading = new(
-                target.Transform.forward.x, 0f, target.Transform.forward.z
-            );
-            targetHeading = targetHeading.normalized;
+            float speedRatio;
+            if (
+                target.Moveable.CurrentSpeed == 0f &&
+                target.Moveable.CurrentAngularSpeed == 0f
+                )
+            {
+                speedRatio = 0f;
+            }
+            else if (target.Moveable.CurrentSpeed == 0f)
+            {
+                speedRatio = 1f / _maxSpeed;
+            }
+            else
+            {
+                speedRatio = target.Moveable.CurrentSpeed / _maxSpeed;
+            }
 
             return new SelectionInfo(
-                target.Transform.position + target.Speed * timeToInterception * targetHeading
+                targetTransform.position +
+                speedRatio * timeToInterception * target.Moveable.Heading
                 );
         }
 

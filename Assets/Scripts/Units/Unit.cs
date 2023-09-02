@@ -13,8 +13,7 @@ namespace StateOfClone.Units
         public IHexCell Location { get; set; }
         public float Orientation { get; set; }
 
-        public int Speed => (int)UnitData.MaxSpeed;
-        public float CurrentSpeed => UnitMove.CurrentSpeed;
+        public int HexSpeed => (int)UnitData.MaxSpeed;
 
         public int VisionRange => UnitData.VisionRange;
 
@@ -25,6 +24,16 @@ namespace StateOfClone.Units
         public UnityEvent OnSelected { get; set; }
         public UnityEvent OnDeselected { get; set; }
 
+        public float CurrentSpeed => UnitMove.CurrentSpeed;
+        public float CurrentAngularSpeed => UnitMove.CurrentAngularSpeed;
+        public Vector3 Heading
+        {
+            get
+            {
+                Vector3 forward = new(transform.forward.x, 0f, transform.forward.z);
+                return forward.normalized;
+            }
+        }
         public UnitMove UnitMove { get; private set; }
 
         private void Awake()

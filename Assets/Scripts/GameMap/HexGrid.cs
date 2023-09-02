@@ -419,12 +419,12 @@ namespace StateOfClone.GameMap
             currentPathFrom = fromCell;
             currentPathTo = toCell;
             currentPathExists = Search(fromCell, toCell, unit);
-            ShowPath(unit.Speed);
+            ShowPath(unit.HexSpeed);
         }
 
         private bool Search(IHexCell fromCell, IHexCell toCell, IHexUnit unit)
         {
-            int speed = unit.Speed;
+            int speed = unit.HexSpeed;
             searchFrontierPhase += 2;
             if (searchFrontier == null)
                 searchFrontier = new HexCellPriorityQueue();

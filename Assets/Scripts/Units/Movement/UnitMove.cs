@@ -8,6 +8,7 @@ namespace StateOfClone.Units
     public class UnitMove : MonoBehaviour, IUnitAction
     {
         public float CurrentSpeed => _locomotion.Motion.CurrentSpeedUnitPerSec;
+        public float CurrentAngularSpeed => _locomotion.Motion.CurrentAngularSpeedDegPerSec;
         [SerializeField] private LayerMask _groundLayer;
 
         private PlayerInput _playerInput;
@@ -58,8 +59,8 @@ namespace StateOfClone.Units
             }
             _locomotion.enabled = true;
 
-            SelectionInfo target = _movementTargets[^1];
-            if (Vector3.Distance(_rigidbody.position, target.Position) < 0.5f)
+            SelectionInfo targetInfo = _movementTargets[^1];
+            if (Vector3.Distance(_rigidbody.position, targetInfo.Position) < 0.5f)
             {
                 Debug.Log("Reached target");
                 _movementTargets.RemoveAt(_movementTargets.Count - 1);
@@ -67,10 +68,11 @@ namespace StateOfClone.Units
             }
 
             SteeringParams steeringParams = SteeringParams.Zero;
-            SelectionInfo self = new(transform, CurrentSpeed);
+            SelectionInfo selfInfo = new(_unit);
+            Debug.Log($"Self Info: {selfInfo}; Target Info: {targetInfo}");
             foreach (SteeringBehavior steering in _actionSelector.Behaviors.Cast<SteeringBehavior>())
             {
-                steeringParams += steering.GetSteering(self, target);
+                steeringParams += steering.GetSteering(selfInfo, targetInfo);
                 _targetGizmo = steeringParams.Target;
             }
             if (_actionSelector.Behaviors.Count == 0)
@@ -123,7 +125,7 @@ namespace StateOfClone.Units
                     // Handle selectable object logic here
                     _movementTargets.Clear();
                     _movementTargets.Add(
-                        new SelectionInfo(hitInfo.transform, moveable.CurrentSpeed)
+                        new SelectionInfo(moveable)
                         );
                     return;
                 }
@@ -156,13 +158,13 @@ namespace StateOfClone.Units
                 Vector3 start = _movementTargets[i].Type switch
                 {
                     SelectionType.Ground => _movementTargets[i].Position,
-                    SelectionType.Moveable => _movementTargets[i].Transform.position,
+                    SelectionType.Moveable => _movementTargets[i].Moveable.transform.position,
                     _ => Vector3.zero
                 };
                 Vector3 stopNext = _movementTargets[i + 1].Type switch
                 {
                     SelectionType.Ground => _movementTargets[i + 1].Position,
-                    SelectionType.Moveable => _movementTargets[i + 1].Transform.position,
+                    SelectionType.Moveable => _movementTargets[i + 1].Moveable.transform.position,
                     _ => Vector3.zero
                 };
                 Gizmos.DrawSphere(start + offset, 0.5f);

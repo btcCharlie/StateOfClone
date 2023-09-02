@@ -21,8 +21,19 @@ namespace StateOfClone.Units
                 SteeringType.Flee => CreateSteeringFlee(
                     unitData, locomotion
                 ),
+                _ => throw new NotImplementedException(steeringType.ToString())
+            };
+        }
+
+        public static ISteeringBehavior CreateBehavior(
+            SteeringType steeringType, UnitData unitData, Locomotion locomotion,
+            ISteeringPredictor predictor
+        )
+        {
+            return steeringType switch
+            {
                 SteeringType.Pursuit => CreateSteeringPursuit(
-                    unitData, locomotion
+                    unitData, locomotion, predictor
                 ),
                 _ => throw new NotImplementedException(steeringType.ToString())
             };
@@ -43,10 +54,9 @@ namespace StateOfClone.Units
         }
 
         public static ISteeringBehavior CreateSteeringPursuit(
-            UnitData unitData, Locomotion locomotion
+            UnitData unitData, Locomotion locomotion, ISteeringPredictor predictor
             )
         {
-            HeadingSteeringPredictor predictor = new(0.5f);
             return new SteeringPursuit(unitData, locomotion, predictor);
         }
 

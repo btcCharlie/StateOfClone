@@ -38,10 +38,21 @@ namespace StateOfClone.Units
             _unit = GetComponent<Unit>();
             _locomotion = GetComponent<Locomotion>();
 #endif
-
-            newSteering = SteeringBehaviorFactory.CreateBehavior(
+            if (steeringType == SteeringType.Pursuit)
+            {
+                HeadingSteeringPredictor predictor = new(
+                    0.5f, _unit.UnitData.MaxSpeed
+                );
+                newSteering = SteeringBehaviorFactory.CreateBehavior(
+                    steeringType, _unit.UnitData, _locomotion, predictor
+                );
+            }
+            else
+            {
+                newSteering = SteeringBehaviorFactory.CreateBehavior(
                 steeringType, _unit.UnitData, _locomotion
             );
+            }
 
             if (newSteering == null)
             {

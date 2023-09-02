@@ -8,7 +8,7 @@ namespace StateOfClone.Core
         IHexGrid Grid { get; set; }
         IHexCell Location { get; set; }
         float Orientation { get; set; }
-        int Speed { get; }
+        int HexSpeed { get; }
         int VisionRange { get; }
 
         void Die();
