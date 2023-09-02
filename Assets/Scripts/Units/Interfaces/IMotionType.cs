@@ -9,12 +9,12 @@ namespace StateOfClone.Units
         float CurrentAngularSpeedDegPerSec { get; }
         SteeringParams SteeringParams { get; set; }
 
-        Vector3 ApplyPosition(Vector3 oldPosition, Vector3 newPosition)
+        Vector3 GetPosition(Vector3 oldPosition, Vector3 newPosition)
         {
             return newPosition;
         }
 
-        Quaternion ApplyRotation(Quaternion oldRotation, Quaternion newRotation)
+        Quaternion GetRotation(Quaternion oldRotation, Quaternion newRotation)
         {
             return newRotation;
         }

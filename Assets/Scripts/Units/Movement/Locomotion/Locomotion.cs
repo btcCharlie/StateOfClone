@@ -78,8 +78,8 @@ namespace StateOfClone.Units
                     ) * newRotation;
             }
 
-            _rb.position = Motion.ApplyPosition(_rb.position, newPosition);
-            _rb.rotation = Motion.ApplyRotation(_rb.rotation, newRotation);
+            _rb.position = Motion.GetPosition(_rb.position, newPosition);
+            _rb.rotation = Motion.GetRotation(_rb.rotation, newRotation);
 
             _smoothingQueues.AddNewSpeed(Motion.CurrentSpeedUnitPerSec);
             Motion.UpdateMaxSpeed();

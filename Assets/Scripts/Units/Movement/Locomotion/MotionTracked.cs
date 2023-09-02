@@ -10,20 +10,20 @@ namespace StateOfClone.Units
         public SteeringParams SteeringParams { get; set; }
 
         private float _actualMaxSpeed;
-        private float _inPlaceTurnLowerLimitDegrees = 5f;
-        private float _inPlaceTurnUpperLimitDegrees = 15f;
-        private float _activeLimit;
+        private float _inPlaceTurnLimitDegrees = 30f;
 
         public MotionTracked(UnitData unitData)
         {
-            SpeedCalculator = new TrackedSpeedCalculator(unitData);
+            SpeedCalculator = new TrackedSpeedCalculator(unitData)
+            {
+                TurnLimit = _inPlaceTurnLimitDegrees
+            };
             _actualMaxSpeed = unitData.MaxSpeed;
-            _activeLimit = _inPlaceTurnLowerLimitDegrees;
         }
 
-        public Vector3 ApplyPosition(Vector3 oldPosition, Vector3 newPosition)
+        public Vector3 GetPosition(Vector3 oldPosition, Vector3 newPosition)
         {
-            if (Mathf.Abs(SteeringParams.Yaw) > _activeLimit)
+            if (Mathf.Abs(SteeringParams.Yaw) > _inPlaceTurnLimitDegrees)
             {
                 CurrentSpeedUnitPerSec = 0f;
             }
@@ -31,15 +31,8 @@ namespace StateOfClone.Units
             return newPosition;
         }
 
-        public Quaternion ApplyRotation(Quaternion oldRotation, Quaternion newRotation)
+        public Quaternion GetRotation(Quaternion oldRotation, Quaternion newRotation)
         {
-            _activeLimit =
-                Mathf.Abs(CurrentSpeedUnitPerSec) < 0.1f ?
-                _inPlaceTurnLowerLimitDegrees :
-                _inPlaceTurnUpperLimitDegrees;
-
-            SpeedCalculator.TurnLimit = _activeLimit;
-
             return newRotation;
         }
 
