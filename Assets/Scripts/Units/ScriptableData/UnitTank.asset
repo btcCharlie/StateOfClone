@@ -18,6 +18,7 @@ MonoBehaviour:
   MaxAngularAcceleration: 60
   MaxTurnRate: 50
   MinTurnRate: 5
+  InPlaceTurnLimit: 30
   VisionRange: 15
   Health: 0
   IsAirborne: 0

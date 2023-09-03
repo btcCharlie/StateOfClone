@@ -18,9 +18,13 @@ MonoBehaviour:
   MaxAngularAcceleration: 60
   MaxTurnRate: 60
   MinTurnRate: 15
+  InPlaceTurnLimit: 0
   VisionRange: 10
   Health: 0
   IsAirborne: 0
   YawCurveScale: 3
   SpeedCurveSlant: 0.1
+  SmoothingNormalsCount: 10
+  SmoothingSpeedsCount: 10
+  SmoothingAngularsCount: 1
   FrictionCoefficient: 0.1

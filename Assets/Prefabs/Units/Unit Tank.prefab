@@ -1030,6 +1030,7 @@ MonoBehaviour:
   _groundDetectionRange: 10
   _recentNormalsCount: 10
   _recentSpeedsCount: 10
+  _recentAngularsCount: 10
   motionTypeSelection: 1
 --- !u!114 &-2829585075005166425
 MonoBehaviour:

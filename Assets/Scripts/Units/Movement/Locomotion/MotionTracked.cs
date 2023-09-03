@@ -19,6 +19,7 @@ namespace StateOfClone.Units
                 TurnLimit = _inPlaceTurnLimitDegrees
             };
             _actualMaxSpeed = unitData.MaxSpeed;
+            _inPlaceTurnLimitDegrees = unitData.InPlaceTurnLimit;
         }
 
         public Vector3 GetPosition(Vector3 oldPosition, Vector3 newPosition)

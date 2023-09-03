@@ -41,6 +41,7 @@ namespace StateOfClone.Units
 
             if (
                 steeringType == SteeringType.Pursuit ||
+                steeringType == SteeringType.OffsetPursuit ||
                 steeringType == SteeringType.Evasion
                 )
             {

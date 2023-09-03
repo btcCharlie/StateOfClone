@@ -4,7 +4,7 @@ namespace StateOfClone.Units
 {
     public enum SteeringType
     {
-        Seek, Flee, Pursuit, Evasion, Arrival
+        Seek, Flee, Pursuit, OffsetPursuit, Evasion, Arrival
     }
 
     public static class SteeringBehaviorFactory
@@ -21,7 +21,9 @@ namespace StateOfClone.Units
                 SteeringType.Flee => CreateSteeringFlee(
                     unitData, locomotion
                 ),
-                _ => throw new NotImplementedException(steeringType.ToString())
+                _ => throw new Exception(
+                    $"Steering '{steeringType.ToString()}' is unknown or cannot be instantiated with this method. Did you miss an argument?"
+                    )
             };
         }
 
@@ -35,10 +37,15 @@ namespace StateOfClone.Units
                 SteeringType.Pursuit => CreateSteeringPursuit(
                     unitData, locomotion, predictor
                 ),
+                SteeringType.OffsetPursuit => CreateSteeringOffsetPursuit(
+                    unitData, locomotion, predictor
+                ),
                 SteeringType.Evasion => CreateSteeringEvasion(
                     unitData, locomotion, predictor
                 ),
-                _ => throw new NotImplementedException(steeringType.ToString())
+                _ => throw new Exception(
+                    $"Steering '{steeringType.ToString()}' is unknown or cannot be instantiated with this method. Did you miss an argument?"
+                    )
             };
         }
 
@@ -61,6 +68,13 @@ namespace StateOfClone.Units
             )
         {
             return new SteeringPursuit(unitData, locomotion, predictor);
+        }
+
+        public static ISteeringBehavior CreateSteeringOffsetPursuit(
+            UnitData unitData, Locomotion locomotion, ISteeringPredictor predictor
+            )
+        {
+            return new SteeringOffsetPursuit(unitData, locomotion, predictor);
         }
 
         public static ISteeringBehavior CreateSteeringEvasion(

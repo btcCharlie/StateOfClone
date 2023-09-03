@@ -7,7 +7,7 @@ namespace StateOfClone.Units
     /// <summary>
     /// Physical motion of units.
     /// </summary>
-    [RequireComponent(typeof(Unit))]
+    [RequireComponent(typeof(IMoveable))]
     public class Locomotion : MonoBehaviour
     {
         private Rigidbody _rb;
@@ -16,8 +16,6 @@ namespace StateOfClone.Units
         private UnitData _ud;
 
         [SerializeField] private float _groundDetectionRange = 10f;
-        [SerializeField] private int _recentNormalsCount = 10;
-        [SerializeField] private int _recentSpeedsCount = 5;
 
         private SmoothingAverageQueue _smoothingQueues;
 
@@ -35,7 +33,9 @@ namespace StateOfClone.Units
             _rb = GetComponent<Rigidbody>();
             _groundLayer = LayerMask.GetMask("Ground");
             _smoothingQueues = new SmoothingAverageQueue(
-                _recentSpeedsCount, _recentNormalsCount
+                _ud.SmoothingSpeedsCount,
+                _ud.SmoothingNormalsCount,
+                _ud.SmoothingAngularsCount
             );
 
             Motion = MotionTypeFactory.CreateMotion(
@@ -52,7 +52,7 @@ namespace StateOfClone.Units
                         transform.up, hit.normal
                     ) * _rb.rotation;
 
-                _smoothingQueues.Initiliaze(hit.normal, 0f);
+                _smoothingQueues.Initiliaze(hit.normal, 0f, 0f);
             }
         }
 
@@ -65,7 +65,7 @@ namespace StateOfClone.Units
                 _smoothingQueues.AverageSpeed() * Time.fixedDeltaTime * transform.forward;
 
             Quaternion newRotation = Quaternion.Euler(
-                    0f, Motion.CurrentAngularSpeedDegPerSec * Time.fixedDeltaTime, 0f
+                    0f, _smoothingQueues.AverageAngular() * Time.fixedDeltaTime, 0f
                 ) * _rb.rotation;
 
             if (IsOnGround(newPosition, out RaycastHit hit))
@@ -82,6 +82,7 @@ namespace StateOfClone.Units
             _rb.rotation = Motion.GetRotation(_rb.rotation, newRotation);
 
             _smoothingQueues.AddNewSpeed(Motion.CurrentSpeedUnitPerSec);
+            _smoothingQueues.AddNewAngular(Motion.CurrentAngularSpeedDegPerSec);
             Motion.UpdateMaxSpeed();
         }
 
@@ -108,7 +109,10 @@ namespace StateOfClone.Units
             float startTime = Time.time;
             float coroutineTimeoutSeconds = 5f;
 
-            while (_smoothingQueues.AverageSpeed() != 0f)
+            while (
+                _smoothingQueues.AverageSpeed() != 0f &&
+                _smoothingQueues.AverageAngular() != 0f
+                )
             {
                 if (Time.time - startTime > coroutineTimeoutSeconds)
                 {
@@ -126,9 +130,11 @@ namespace StateOfClone.Units
         {
             Vector3 currentNormal = _smoothingQueues.AverageNormal();
             _smoothingQueues = new SmoothingAverageQueue(
-                _recentSpeedsCount, _recentNormalsCount
+                _ud.SmoothingSpeedsCount,
+                _ud.SmoothingNormalsCount,
+                _ud.SmoothingAngularsCount
             );
-            _smoothingQueues.Initiliaze(currentNormal, 0f);
+            _smoothingQueues.Initiliaze(currentNormal, 0f, 0f);
 
             Motion = MotionTypeFactory.CreateMotion(
                 motionTypeSelection, _ud

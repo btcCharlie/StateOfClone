@@ -92,6 +92,16 @@ namespace StateOfClone.Units
             point.y = _turret.position.y;
             _turret.LookAt(point);
         }
+
+        private void OnDrawGizmosSelected()
+        {
+            Color ogColor = Gizmos.color;
+            Gizmos.color = Color.blue;
+
+            Gizmos.DrawWireSphere(transform.position, UnitData.MainWeaponRange);
+
+            Gizmos.color = ogColor;
+        }
     }
 
 }
