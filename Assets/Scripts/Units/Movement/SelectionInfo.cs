@@ -1,3 +1,4 @@
+using Codice.Client.BaseCommands.TubeClient;
 using UnityEngine;
 
 namespace StateOfClone.Units
@@ -10,20 +11,34 @@ namespace StateOfClone.Units
     public struct SelectionInfo
     {
         public SelectionType Type { get; private set; }
-        public Vector3 Position { get; private set; }
+        public Vector3 Position
+        {
+            readonly get
+            {
+                return Type switch
+                {
+                    SelectionType.Ground => _position,
+                    SelectionType.Moveable => Moveable.transform.position,
+                    _ => Vector3.zero
+                };
+            }
+            private set { _position = value; }
+        }
         public IMoveable Moveable { get; private set; }
+
+        Vector3 _position;
 
         public SelectionInfo(Vector3 position)
         {
             Type = SelectionType.Ground;
-            Position = position;
+            _position = position;
             Moveable = null;
         }
 
         public SelectionInfo(IMoveable moveable)
         {
             Type = SelectionType.Moveable;
-            Position = moveable.transform.position;
+            _position = moveable.transform.position;
             Moveable = moveable;
         }
 
@@ -32,7 +47,7 @@ namespace StateOfClone.Units
             string infoString;
             if (Type == SelectionType.Ground)
             {
-                infoString = $"Type: Ground; Position: {Position.x},{Position.y},{Position.z}";
+                infoString = $"Type: Ground; Position: {_position.x},{_position.y},{_position.z}";
             }
             else if (Type == SelectionType.Moveable)
             {

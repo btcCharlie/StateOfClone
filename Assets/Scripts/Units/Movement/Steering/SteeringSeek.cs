@@ -11,7 +11,9 @@ namespace StateOfClone.Units
             SteeringType = SteeringType.Seek;
         }
 
-        public override SteeringParams GetSteering(SelectionInfo self, SelectionInfo target)
+        public override SteeringParams GetSteering(
+            SelectionInfo self, SelectionInfo target
+            )
         {
             Vector3 desiredVelocity =
                 (target.Position - self.Position).normalized * _ud.MaxSpeed;

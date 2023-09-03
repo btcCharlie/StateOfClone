@@ -22,7 +22,23 @@ namespace StateOfClone.Units
                     unitData, locomotion
                 ),
                 _ => throw new Exception(
-                    $"Steering '{steeringType.ToString()}' is unknown or cannot be instantiated with this method. Did you miss an argument?"
+                    $"Steering '{steeringType}' is unknown or cannot be instantiated with this method. Did you pass a wrong argument?"
+                    )
+            };
+        }
+
+        public static ISteeringBehavior CreateBehavior(
+            SteeringType steeringType, UnitData unitData, Locomotion locomotion,
+            float parameter
+        )
+        {
+            return steeringType switch
+            {
+                SteeringType.Arrival => CreateSteeringArrival(
+                    unitData, locomotion, parameter
+                ),
+                _ => throw new Exception(
+                    $"Steering '{steeringType}' is unknown or cannot be instantiated with this method. Did you pass a wrong argument?"
                     )
             };
         }
@@ -44,7 +60,7 @@ namespace StateOfClone.Units
                     unitData, locomotion, predictor
                 ),
                 _ => throw new Exception(
-                    $"Steering '{steeringType.ToString()}' is unknown or cannot be instantiated with this method. Did you miss an argument?"
+                    $"Steering '{steeringType}' is unknown or cannot be instantiated with this method. Did you pass a wrong argument?"
                     )
             };
         }
@@ -85,10 +101,10 @@ namespace StateOfClone.Units
         }
 
         public static ISteeringBehavior CreateSteeringArrival(
-            UnitData unitData, Locomotion locomotion
+            UnitData unitData, Locomotion locomotion, float slowDownRadius
             )
         {
-            return new SteeringArrival(unitData, locomotion);
+            return new SteeringArrival(unitData, locomotion, slowDownRadius);
         }
     }
 }

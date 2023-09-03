@@ -2,24 +2,28 @@ using UnityEngine;
 
 namespace StateOfClone.Units
 {
-    public class SteeringArrival : SteeringBehavior
+    public class SteeringArrival : SteeringBehavior, ISteeringBehavior
     {
         private float _yaw, _pitch, _speed;
-        public float slowingDistance = 10f; // The distance at which the agent starts to slow down
+        private float _slowDownRadius;
 
-        public SteeringArrival(UnitData ud, Locomotion locomotion) : base(ud, locomotion)
+        public SteeringArrival(
+            UnitData ud, Locomotion locomotion, float slowDownRadius
+            ) : base(ud, locomotion)
         {
             SteeringType = SteeringType.Arrival;
+            _slowDownRadius = slowDownRadius;
         }
 
-        public override SteeringParams GetSteering(SelectionInfo self, SelectionInfo target)
+        public override SteeringParams GetSteering(
+            SelectionInfo self, SelectionInfo target
+            )
         {
-            // Calculate the desired velocity
             Vector3 direction = target.Position - self.Position;
             float distance = direction.magnitude;
             float speed =
-                (distance < slowingDistance) ?
-                _ud.MaxSpeed * (distance / slowingDistance) :
+                (distance < _slowDownRadius) ?
+                _ud.MaxSpeed * (distance / _slowDownRadius) :
                 _ud.MaxSpeed;
             Vector3 desiredVelocity = direction.normalized * speed;
 
@@ -33,8 +37,7 @@ namespace StateOfClone.Units
 
             _speed = CalculateSpeed(desiredVelocity, trueMaxSpeed);
 
-            // Create and return the SteeringParams
-            return new SteeringParams(_yaw, _pitch, _speed);
+            return new SteeringParams(_yaw, _pitch, _speed, target.Position);
         }
 
         protected override float CalculateYaw(Vector3 desiredVelocity)
@@ -54,13 +57,13 @@ namespace StateOfClone.Units
 
         protected override float CalculatePitch(Vector3 desiredVelocity)
         {
-            // For now, we're not considering pitch, so return 0
             return 0f;
         }
 
-        protected override float CalculateSpeed(Vector3 desiredVelocity, float trueMaxSpeed)
+        protected override float CalculateSpeed(
+            Vector3 desiredVelocity, float trueMaxSpeed
+            )
         {
-            // For the Arrival behavior, the speed should be the magnitude of the desired velocity
             return Mathf.Clamp(
                 desiredVelocity.magnitude,
                 -trueMaxSpeed,

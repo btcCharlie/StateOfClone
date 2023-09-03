@@ -47,16 +47,23 @@ namespace StateOfClone.Units
             {
                 HeadingSteeringPredictor predictor = new(
                     0.5f, _unit.UnitData.MaxSpeed
-                );
+                    );
                 newSteering = SteeringBehaviorFactory.CreateBehavior(
                     steeringType, _unit.UnitData, _locomotion, predictor
-                );
+                    );
+            }
+            else if (steeringType == SteeringType.Arrival)
+            {
+                float parameter = 10f;
+                newSteering = SteeringBehaviorFactory.CreateBehavior(
+                    steeringType, _unit.UnitData, _locomotion, parameter
+                    );
             }
             else
             {
                 newSteering = SteeringBehaviorFactory.CreateBehavior(
-                steeringType, _unit.UnitData, _locomotion
-            );
+                    steeringType, _unit.UnitData, _locomotion
+                    );
             }
 
             if (newSteering == null)
