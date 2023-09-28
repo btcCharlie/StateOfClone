@@ -27,4 +27,5 @@ MonoBehaviour:
   SmoothingNormalsCount: 10
   SmoothingSpeedsCount: 10
   SmoothingAngularsCount: 1
+  MainWeaponRange: 0
   FrictionCoefficient: 0.1
